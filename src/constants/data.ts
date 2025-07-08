@@ -22,33 +22,49 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
-    title: 'Request',
+    title: 'Engagement Requests',
     url: '/dashboard/request',
-    icon: 'request', // IconFilePlus
+    icon: 'request',
     isActive: false,
     shortcut: ['r', 'r'],
     items: []
   },
   {
-    title: 'Proposals',
-    url: '/dashboard/proposals',
-    icon: 'proposals', // IconFileText
-    isActive: false,
-    shortcut: ['p', 'p'],
-    items: []
-  },
-  {
     title: 'Active Engagements',
     url: '/dashboard/engagements',
-    icon: 'engagements', // IconBriefcase
+    icon: 'engagements',
     isActive: false,
     shortcut: ['e', 'e'],
     items: []
   },
   {
+    title: 'Messaging & Meetings',
+    url: '/dashboard/connect',
+    icon: 'connect',
+    shortcut: ['c', 'c'],
+    isActive: false,
+    items: []
+  },
+  {
+    title: 'Profile & Compliance',
+    url: '/dashboard/profile',
+    icon: 'user',
+    isActive: false,
+    shortcut: ['p', 'c'],
+    items: []
+  },
+  {
+    title: 'Proposals',
+    url: '/dashboard/proposals',
+    icon: 'proposals',
+    isActive: false,
+    shortcut: ['p', 'p'],
+    items: []
+  },
+  {
     title: 'Payments',
     url: '/dashboard/payments',
-    icon: 'payments', // IconCreditCard
+    icon: 'payments',
     isActive: false,
     shortcut: ['y', 'y'],
     items: []
@@ -56,17 +72,9 @@ export const navItems: NavItem[] = [
   {
     title: 'History',
     url: '/dashboard/history',
-    icon: 'history', // IconClock
+    icon: 'history',
     isActive: false,
     shortcut: ['h', 'h'],
-    items: []
-  },
-  {
-    title: 'Connect',
-    url: '/dashboard/connect',
-    icon: 'connect', // IconMessageCircle
-    shortcut: ['c', 'c'],
-    isActive: false,
     items: []
   }
 ];

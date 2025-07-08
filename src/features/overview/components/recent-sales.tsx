@@ -7,41 +7,41 @@ import {
   CardDescription
 } from '@/components/ui/card';
 
-const salesData = [
+const projectsData = [
   {
-    name: 'Olivia Martin',
-    email: 'olivia.martin@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/1.png',
-    fallback: 'OM',
-    amount: '+$1,999.00'
+    name: 'Acme Corp Q2 Audit',
+    type: 'Audit',
+    status: 'In Progress',
+    budget: '€5,000',
+    deadline: '2024-07-15'
   },
   {
-    name: 'Jackson Lee',
-    email: 'jackson.lee@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/2.png',
-    fallback: 'JL',
-    amount: '+$39.00'
+    name: 'Beta Ltd Tax Filing',
+    type: 'Tax',
+    status: 'Planning',
+    budget: '€2,500',
+    deadline: '2024-07-30'
   },
   {
-    name: 'Isabella Nguyen',
-    email: 'isabella.nguyen@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/3.png',
-    fallback: 'IN',
-    amount: '+$299.00'
+    name: 'Gamma Inc Annual Audit',
+    type: 'Audit',
+    status: 'Under Review',
+    budget: '€7,200',
+    deadline: '2024-08-10'
   },
   {
-    name: 'William Kim',
-    email: 'will@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/4.png',
-    fallback: 'WK',
-    amount: '+$99.00'
+    name: 'Delta LLC VAT Return',
+    type: 'Tax',
+    status: 'In Progress',
+    budget: '€1,800',
+    deadline: '2024-07-20'
   },
   {
-    name: 'Sofia Davis',
-    email: 'sofia.davis@email.com',
-    avatar: 'https://api.slingacademy.com/public/sample-users/5.png',
-    fallback: 'SD',
-    amount: '+$39.00'
+    name: 'Epsilon GmbH Compliance',
+    type: 'Audit',
+    status: 'Planning',
+    budget: '€3,400',
+    deadline: '2024-08-01'
   }
 ];
 
@@ -50,25 +50,23 @@ export function RecentSales() {
     <Card className='h-full'>
       <CardHeader>
         <CardTitle>Recent Projects</CardTitle>
-        {/* <CardDescription>You have done 265 projects this month.</CardDescription> */}
-        <div className='flex justify-between'>
-          <h6>Project Name</h6>
-          <h6>Budget</h6>
+        <div className='flex justify-between text-xs font-semibold text-muted-foreground border-b pb-2'>
+          <span className='w-1/4'>Project Name</span>
+          <span className='w-1/6'>Type</span>
+          <span className='w-1/6'>Status</span>
+          <span className='w-1/6'>Budget</span>
+          <span className='w-1/6'>Deadline</span>
         </div>
       </CardHeader>
       <CardContent>
-        <div className='space-y-8'>
-          {salesData.map((sale, index) => (
-            <div key={index} className='flex items-center'>
-              <Avatar className='h-9 w-9'>
-                <AvatarImage src={sale.avatar} alt='Avatar' />
-                <AvatarFallback>{sale.fallback}</AvatarFallback>
-              </Avatar>
-              <div className='ml-4 space-y-1'>
-                <p className='text-sm leading-none font-medium'>{sale.name}</p>
-                <p className='text-muted-foreground text-sm'>{sale.email}</p>
-              </div>
-              <div className='ml-auto font-medium'>{sale.amount}</div>
+        <div className='divide-y'>
+          {projectsData.map((proj, idx) => (
+            <div key={idx} className='flex items-center py-3 text-sm'>
+              <span className='w-1/4 font-medium'>{proj.name}</span>
+              <span className='w-1/6'>{proj.type}</span>
+              <span className='w-1/6'>{proj.status}</span>
+              <span className='w-1/6'>{proj.budget}</span>
+              <span className='w-1/6'>{proj.deadline}</span>
             </div>
           ))}
         </div>
