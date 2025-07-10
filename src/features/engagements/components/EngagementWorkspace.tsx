@@ -87,7 +87,7 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
     <div className="bg-background dark:bg-background min-h-screen w-full transition-colors">
       <Header />
       <TabNavigation />
-      <main className="p-6 overflow-y-scroll max-h-[calc(100vh-160px)]">
+      <main className="p-6 overflow-y-scroll max-h-[calc(100vh-200px)]">
         {children}
       </main>
     </div>

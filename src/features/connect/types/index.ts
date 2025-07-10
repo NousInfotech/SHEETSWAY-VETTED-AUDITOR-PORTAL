@@ -1,84 +1,66 @@
-// Chat Types
-export interface ChatMessage {
-  id: string;
-  sender: 'bot' | 'user' | 'agent';
-  message: string;
-  time: string;
-  timestamp: number;
-  type?: 'text' | 'image' | 'file';
+export interface FileAttachment {
+  id: number;
+  name: string;
+  size: string;
+  type: string;
+  url: string;
 }
 
-// Meeting Types
+export interface ChatMessage {
+  id: number;
+  sender: string;
+  content: string;
+  timestamp: string;
+  type: 'sent' | 'received';
+  attachments?: FileAttachment[];
+}
+
+export interface Chat {
+  id: number;
+  type: 'project' | 'global' | 'admin';
+  projectName: string;
+  participants: string[];
+  lastMessage: string;
+  timestamp: string;
+  unread: number;
+  messages: ChatMessage[];
+  archived?: boolean;
+}
+
 export interface Meeting {
-  id: string;
+  id: number;
   title: string;
   date: string;
   time: string;
-  duration: number;
-  type: 'onboarding' | 'support' | 'audit';
-  status: 'scheduled' | 'completed' | 'cancelled';
-  attendees: string[];
-  description?: string;
+  participants: string[];
+  type: string;
+  status: string;
+  zoomLink?: string;
 }
 
-// Contact Types
-export interface Contact {
-  id: string;
-  name: string;
-  role: string;
-  email: string;
-  status: 'online' | 'offline' | 'busy';
-  avatar?: string;
-  lastSeen?: string;
-}
-
-// Available Slot Types
-export interface AvailableSlot {
+export interface NewMeetingForm {
+  title: string;
   date: string;
   time: string;
-  available: boolean;
-  type: 'onboarding' | 'support' | 'audit';
+  participants: string;
+  type: string;
 }
 
-// UI State Types
-export interface ConnectUIState {
-  currentView: string;
-  isDark: boolean;
-  activeChat: string;
-  message: string;
-  selectedDate: string;
-  selectedTime: string;
-  searchTerm: string;
-  notifications: boolean;
+export interface CallLog {
+  id: number;
+  participant: string;
+  type: 'incoming' | 'outgoing' | 'missed';
+  duration: string;
+  timestamp: string;
+  projectName?: string;
 }
 
-// Store Types
-export interface ConnectStore extends ConnectUIState {
-  // Data State
-  chatMessages: Record<string, ChatMessage[]>;
-  meetings: Meeting[];
-  contacts: Contact[];
-
-  // Actions
-  setCurrentView: (view: string) => void;
-  toggleTheme: () => void;
-  setActiveChat: (chat: string) => void;
-  setMessage: (message: string) => void;
-  setSelectedDate: (date: string) => void;
-  setSelectedTime: (time: string) => void;
-  setSearchTerm: (term: string) => void;
-  setNotifications: (enabled: boolean) => void;
-
-  // Chat actions
-  sendMessage: (chatId: string, message: string) => void;
-  addChatMessage: (chatId: string, message: ChatMessage) => void;
-
-  // Meeting actions
-  addMeeting: (meeting: Meeting) => void;
-  updateMeeting: (id: string, updates: Partial<Meeting>) => void;
-  cancelMeeting: (id: string) => void;
-  deleteMeeting: (id: string) => void;
-
-  // Contact actions
-  updateContact: (id: string, updates: Partial<Contact>) => void;
+export interface NewChatForm {
+  type: 'project' | 'global' | 'admin';
+  projectName: string;
+  participants: string;
 }
+
+export type TabType = 'messages' | 'meetings' | 'calls';
+export type FilterType = 'all' | 'project' | 'global' | 'admin';
+export type MessageFilter = 'all' | 'pinned' | 'starred';

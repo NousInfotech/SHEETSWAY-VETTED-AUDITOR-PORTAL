@@ -327,7 +327,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({ engagements, onEn
     <div className="bg-background dark:bg-background min-h-screen w-full transition-colors">
       <Header />
       <FilterBar />
-      <main className="p-6 overflow-y-scroll max-h-[calc(100vh-230px)]">
+      <main className="p-6 overflow-y-scroll max-h-[calc(100vh-280px)]">
         {filteredEngagements.length === 0 ? (
           <EmptyState />
         ) : (

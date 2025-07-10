@@ -1,11 +1,5 @@
-// Export types
+export { ConnectView } from './components/ConnectView';
 export * from './types';
-
-// Export store
-export { useConnectStore } from './store';
-
-// Export constants
 export * from './constants';
-
-// Export utils
 export * from './utils';
+export * from './hooks/useConnect';

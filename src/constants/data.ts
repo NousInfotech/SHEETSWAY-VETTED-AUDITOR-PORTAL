@@ -53,30 +53,30 @@ export const navItems: NavItem[] = [
     shortcut: ['p', 'c'],
     items: []
   },
-  {
-    title: 'Proposals',
-    url: '/dashboard/proposals',
-    icon: 'proposals',
-    isActive: false,
-    shortcut: ['p', 'p'],
-    items: []
-  },
-  {
-    title: 'Payments',
-    url: '/dashboard/payments',
-    icon: 'payments',
-    isActive: false,
-    shortcut: ['y', 'y'],
-    items: []
-  },
-  {
-    title: 'History',
-    url: '/dashboard/history',
-    icon: 'history',
-    isActive: false,
-    shortcut: ['h', 'h'],
-    items: []
-  }
+  // {
+  //   title: 'Proposals',
+  //   url: '/dashboard/proposals',
+  //   icon: 'proposals',
+  //   isActive: false,
+  //   shortcut: ['p', 'p'],
+  //   items: []
+  // },
+  // {
+  //   title: 'Payments',
+  //   url: '/dashboard/payments',
+  //   icon: 'payments',
+  //   isActive: false,
+  //   shortcut: ['y', 'y'],
+  //   items: []
+  // },
+  // {
+  //   title: 'History',
+  //   url: '/dashboard/history',
+  //   icon: 'history',
+  //   isActive: false,
+  //   shortcut: ['h', 'h'],
+  //   items: []
+  // }
 ];
 
 

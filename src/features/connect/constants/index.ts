@@ -1,207 +1,125 @@
-import { ChatMessage, Meeting, Contact, AvailableSlot } from '../types';
+import { Chat, Meeting, CallLog } from '../types';
 
-// Initial Chat Messages
-export const initialChatMessages: Record<string, ChatMessage[]> = {
-  support: [
-    {
-      id: '1',
-      sender: 'bot',
-      message: 'Hello! How can we help you today?',
-      time: '10:30 AM',
-      timestamp: Date.now() - 3600000
-    },
-    {
-      id: '2',
-      sender: 'user',
-      message: 'I have a question about my invoice #5021.',
-      time: '10:31 AM',
-      timestamp: Date.now() - 3500000
-    },
-    {
-      id: '3',
-      sender: 'agent',
-      message: 'I can help you with that. Let me pull up your account details.',
-      time: '10:32 AM',
-      timestamp: Date.now() - 3400000
-    }
-  ],
-  onboarding: [
-    {
-      id: '1',
-      sender: 'bot',
-      message: 'Welcome to Sheetsway! Ready to get started?',
-      time: '9:15 AM',
-      timestamp: Date.now() - 7200000
-    },
-    {
-      id: '2',
-      sender: 'user',
-      message: 'Yes, I need help setting up my account.',
-      time: '9:16 AM',
-      timestamp: Date.now() - 7100000
-    },
-    {
-      id: '3',
-      sender: 'agent',
-      message: "Perfect! I'll walk you through the setup process step by step.",
-      time: '9:17 AM',
-      timestamp: Date.now() - 7000000
-    }
-  ],
-  audit: [
-    {
-      id: '1',
-      sender: 'bot',
-      message: 'Welcome to audit consultation chat.',
-      time: '2:00 PM',
-      timestamp: Date.now() - 1800000
-    },
-    {
-      id: '2',
-      sender: 'user',
-      message: 'I need to schedule an audit review.',
-      time: '2:01 PM',
-      timestamp: Date.now() - 1700000
-    },
-    {
-      id: '3',
-      sender: 'agent',
-      message:
-        'I can help you schedule that. What type of audit review do you need?',
-      time: '2:02 PM',
-      timestamp: Date.now() - 1600000
-    }
-  ]
+export const STORAGE_KEYS = {
+  MESSAGES: 'sheetsway_messages',
+  MEETINGS: 'sheetsway_meetings',
+  CALL_LOGS: 'sheetsway_call_logs'
 };
 
-// Initial Meetings
-export const initialMeetings: Meeting[] = [
+export const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+export const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+export const MEETING_TYPES = [
+  { value: 'zoom', label: 'Zoom Meeting' },
+  { value: 'teams', label: 'Teams Meeting' },
+  { value: 'meet', label: 'Google Meet' }
+];
+
+export const CHAT_TYPES = [
+  { value: 'project', label: 'Project-Based' },
+  { value: 'global', label: 'Global Chat' },
+  { value: 'admin', label: 'Admin Support' }
+];
+
+export const FILTER_TYPES = [
+  { value: 'all', label: 'All Chats' },
+  { value: 'project', label: 'Project-Based' },
+  { value: 'global', label: 'Global' },
+  { value: 'admin', label: 'Admin Support' }
+];
+
+// Initial data
+export const INITIAL_MESSAGES: Chat[] = [
   {
-    id: '1',
-    title: 'Onboarding Call',
-    date: '2024-01-15',
-    time: '10:00',
-    duration: 60,
-    type: 'onboarding',
-    status: 'scheduled',
-    attendees: ['john.doe@example.com', 'support@sheetsway.com'],
-    description: 'Initial onboarding and account setup'
+    id: 1,
+    type: 'project',
+    projectName: 'Acme Corp Q2 Audit',
+    participants: ['John Doe', 'Sarah Wilson'],
+    lastMessage: 'The financial statements are ready for review.',
+    timestamp: '2 hours ago',
+    unread: 3,
+    messages: [
+      { id: 1, sender: 'John Doe', content: 'Hi Sarah, can you review the Q2 statements?', timestamp: '10:30 AM', type: 'received' },
+      { id: 2, sender: 'You', content: 'Sure, I\'ll take a look this afternoon.', timestamp: '10:45 AM', type: 'sent' },
+      { id: 3, sender: 'John Doe', content: 'The financial statements are ready for review.', timestamp: '2:15 PM', type: 'received' }
+    ]
   },
   {
-    id: '2',
-    title: 'Support Session',
-    date: '2024-01-16',
-    time: '14:00',
-    duration: 30,
-    type: 'support',
-    status: 'completed',
-    attendees: ['john.doe@example.com', 'support@sheetsway.com'],
-    description: 'Technical support for integration issues'
+    id: 2,
+    type: 'global',
+    projectName: 'General Discussion',
+    participants: ['Team Admin', 'Support'],
+    lastMessage: 'Your compliance documents have been updated.',
+    timestamp: '1 day ago',
+    unread: 1,
+    messages: [
+      { id: 1, sender: 'Team Admin', content: 'Your compliance documents have been updated.', timestamp: 'Yesterday', type: 'received' }
+    ]
   },
   {
-    id: '3',
-    title: 'Audit Consultation',
-    date: '2024-01-18',
-    time: '11:00',
-    duration: 90,
-    type: 'audit',
-    status: 'scheduled',
-    attendees: ['john.doe@example.com', 'audit@sheetsway.com'],
-    description: 'Monthly audit review and compliance check'
+    id: 3,
+    type: 'admin',
+    projectName: 'Admin Support',
+    participants: ['Support Team'],
+    lastMessage: 'How can we help you today?',
+    timestamp: '3 days ago',
+    unread: 0,
+    messages: [
+      { id: 1, sender: 'Support Team', content: 'How can we help you today?', timestamp: '3 days ago', type: 'received' }
+    ]
   }
 ];
 
-// Initial Contacts
-export const initialContacts: Contact[] = [
+export const INITIAL_MEETINGS: Meeting[] = [
   {
-    id: '1',
-    name: 'Sarah Johnson',
-    role: 'Onboarding Specialist',
-    email: 'sarah@sheetsway.com',
-    status: 'online'
+    id: 1,
+    title: 'Q2 Audit Review',
+    date: '2024-07-15',
+    time: '10:00 AM',
+    participants: ['John Doe', 'Sarah Wilson'],
+    type: 'zoom',
+    status: 'upcoming',
+    zoomLink: 'https://zoom.us/j/123456789'
   },
   {
-    id: '2',
-    name: 'Mike Chen',
-    role: 'Support Agent',
-    email: 'mike@sheetsway.com',
-    status: 'busy'
-  },
-  {
-    id: '3',
-    name: 'Lisa Rodriguez',
-    role: 'Audit Consultant',
-    email: 'lisa@sheetsway.com',
-    status: 'online'
-  },
-  {
-    id: '4',
-    name: 'David Kim',
-    role: 'Technical Support',
-    email: 'david@sheetsway.com',
-    status: 'offline',
-    lastSeen: '2 hours ago'
+    id: 2,
+    title: 'Tax Filing Discussion',
+    date: '2024-07-20',
+    time: '2:00 PM',
+    participants: ['Beta Ltd Team'],
+    type: 'zoom',
+    status: 'upcoming',
+    zoomLink: 'https://zoom.us/j/987654321'
   }
 ];
 
-// Available Time Slots
-export const availableSlots: AvailableSlot[] = [
-  { date: '2024-01-15', time: '10:00', available: true, type: 'onboarding' },
-  { date: '2024-01-15', time: '14:00', available: true, type: 'support' },
-  { date: '2024-01-16', time: '11:00', available: false, type: 'audit' },
-  { date: '2024-01-16', time: '15:00', available: true, type: 'support' },
-  { date: '2024-01-17', time: '09:00', available: true, type: 'onboarding' },
-  { date: '2024-01-17', time: '13:00', available: true, type: 'audit' },
-  { date: '2024-01-18', time: '10:00', available: true, type: 'support' },
-  { date: '2024-01-18', time: '16:00', available: true, type: 'audit' }
-];
-
-// Meeting Types Configuration
-export const meetingTypes = [
+export const INITIAL_CALL_LOGS: CallLog[] = [
   {
-    type: 'onboarding',
-    title: 'Onboarding Call',
-    duration: '60 min',
-    description: 'Get started with your account setup',
-    color: 'blue'
+    id: 1,
+    participant: 'John Doe',
+    type: 'incoming',
+    duration: '15:30',
+    timestamp: '2 hours ago',
+    projectName: 'Acme Corp Q2 Audit'
   },
   {
-    type: 'support',
-    title: 'Support Session',
-    duration: '30 min',
-    description: 'Get help with technical issues',
-    color: 'green'
+    id: 2,
+    participant: 'Support Team',
+    type: 'outgoing',
+    duration: '8:45',
+    timestamp: '1 day ago',
+    projectName: 'Admin Support'
   },
   {
-    type: 'audit',
-    title: 'Audit Consultation',
-    duration: '90 min',
-    description: 'Review compliance and audit requirements',
-    color: 'purple'
+    id: 3,
+    participant: 'Sarah Wilson',
+    type: 'missed',
+    duration: '0:00',
+    timestamp: '3 days ago',
+    projectName: 'Beta Ltd Tax Filing'
   }
-];
-
-// Chat Channels Configuration
-export const chatChannels = [
-  { id: 'support', name: 'General Support', color: 'text-green-500' },
-  { id: 'onboarding', name: 'Onboarding', color: 'text-blue-500' },
-  { id: 'audit', name: 'Audit Support', color: 'text-purple-500' }
-];
-
-// Navigation Tabs
-export const navigationTabs = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'chat', label: 'Chat' },
-  { id: 'schedule', label: 'Schedule' },
-  { id: 'calendar', label: 'Calendar' }
-];
-
-// Time Options for Scheduling
-export const timeOptions = [
-  { value: '09:00', label: '9:00 AM' },
-  { value: '10:00', label: '10:00 AM' },
-  { value: '11:00', label: '11:00 AM' },
-  { value: '14:00', label: '2:00 PM' },
-  { value: '15:00', label: '3:00 PM' },
-  { value: '16:00', label: '4:00 PM' }
 ];

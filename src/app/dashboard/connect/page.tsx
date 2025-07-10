@@ -1,9 +1,10 @@
-import ConnectViewPage from '@/features/connect/components/connect-view';
+"use client";
+import React from 'react';
+import { ConnectView } from '@/features/connect';
 
-export const metadata = {
-  title: 'Dashboard : Connect'
+const ConnectPage = () => {
+  return <ConnectView />;
 };
 
-export default function page() {
-  return <ConnectViewPage />;
-}
+export default ConnectPage;
+
