@@ -21,7 +21,7 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
   const StatusIcon = statusConfig[engagement.status].icon;
 
   const Header = () => (
-    <header className="bg-card dark:bg-card border-b border-border px-6 py-4 transition-colors">
+    <header className="bg-card rounded-t-xl dark:bg-card border-b border-border px-6 py-4 transition-colors">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
@@ -84,12 +84,14 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
   };
 
   return (
-    <div className="bg-background dark:bg-background min-h-screen w-full transition-colors">
+    <div className='overflow-x-auto grid grid-cols-1'>
+    <div className="bg-background dark:bg-background min-h-screen min-w-[1280px] lg:min-w-full transition-colors">
       <Header />
       <TabNavigation />
       <main className="p-6 overflow-y-scroll max-h-[calc(100vh-200px)]">
         {children}
       </main>
+    </div>
     </div>
   );
 };

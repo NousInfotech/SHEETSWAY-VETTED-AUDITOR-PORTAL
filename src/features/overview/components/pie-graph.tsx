@@ -41,7 +41,7 @@ const chartConfig = {
 export function PieGraph() {
   const total = React.useMemo(() => chartData.reduce((acc, curr) => acc + curr.value, 0), []);
   return (
-    <Card className='@container/card'>
+    <Card className='@container/card h-full'>
       <CardHeader>
         <CardTitle>Engagement Types Distribution</CardTitle>
         <CardDescription>Audit vs. Tax engagements (last 6 months)</CardDescription>

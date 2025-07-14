@@ -3,7 +3,6 @@
 import React from 'react';
 import RequestsGrid from './RequestsGrid';
 import { useEngagementRequests } from '../hooks/useEngagementRequests';
-import { SearchAndFilterProps } from '../types/request';
 import PreviewModal from './PreviewModal';
 import ProposalModal from './ProposalModal';
 import SearchAndFilter from './SearchAndFilter';
@@ -33,20 +32,21 @@ const EngagementRequestsPage: React.FC = () => {
   } = useEngagementRequests();
 
   return (
-    <div className="min-h-screen bg-background text-foreground scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-blue-500 scrollbar-track-blue-100 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900" style={{ overflowY: 'auto', maxHeight: '100vh' }}>
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <h1 className="text-3xl font-bold text-foreground">Engagement Requests</h1>
-            <p className="mt-2 text-muted-foreground">Search, filter, and submit proposals for live client requests</p>
-          </div>
+    <div className='flex w-full flex-col'>
+      <div className='mx-auto w-full max-w-7xl'>
+        <div className='py-6'>
+          <h1 className='text-foreground text-3xl font-bold'>
+            Engagement Requests
+          </h1>
+          <p className='text-muted-foreground mt-2'>
+            Search, filter, and submit proposals for live client requests
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className='mx-auto w-full max-w-7xl'>
         {/* Search and Filter Section */}
-        <div className="mb-8 space-y-4">
+        <div className='mb-8 space-y-4'>
           <SearchAndFilter
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -59,15 +59,15 @@ const EngagementRequestsPage: React.FC = () => {
         </div>
 
         {/* Results Summary */}
-        <div className="mb-6 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+        <div className='mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-0'>
+          <p className='text-muted-foreground text-sm'>
             Showing {filteredRequests.length} of {mockRequests.length} requests
           </p>
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+          <div className='flex items-center gap-3'>
+            <span className='bg-primary/10 text-primary rounded-full px-3 py-1 text-sm whitespace-nowrap'>
               {submittedProposals.length} proposals submitted
             </span>
-            <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 rounded-full text-sm">
+            <span className='rounded-full bg-green-100 px-3 py-1 text-sm whitespace-nowrap text-green-800 dark:bg-green-900 dark:text-green-300'>
               {bookmarkedRequests.length} bookmarked
             </span>
           </div>
@@ -82,26 +82,26 @@ const EngagementRequestsPage: React.FC = () => {
           onSubmitProposal={setSelectedRequest}
           isProposalSubmitted={isProposalSubmitted}
         />
+
+        {/* Preview Modal */}
+        <PreviewModal
+          isOpen={!!previewRequest}
+          onClose={() => setPreviewRequest(null)}
+          request={previewRequest}
+        />
+
+        {/* Proposal Modal */}
+        <ProposalModal
+          isOpen={!!selectedRequest}
+          onClose={() => setSelectedRequest(null)}
+          request={selectedRequest}
+          proposalData={proposalData}
+          setProposalData={setProposalData}
+          onSubmit={submitProposal}
+        />
       </div>
-
-      {/* Preview Modal */}
-      <PreviewModal
-        isOpen={!!previewRequest}
-        onClose={() => setPreviewRequest(null)}
-        request={previewRequest}
-      />
-
-      {/* Proposal Modal */}
-      <ProposalModal
-        isOpen={!!selectedRequest}
-        onClose={() => setSelectedRequest(null)}
-        request={selectedRequest}
-        proposalData={proposalData}
-        setProposalData={setProposalData}
-        onSubmit={submitProposal}
-      />
     </div>
   );
 };
 
-export default EngagementRequestsPage; 
+export default EngagementRequestsPage;

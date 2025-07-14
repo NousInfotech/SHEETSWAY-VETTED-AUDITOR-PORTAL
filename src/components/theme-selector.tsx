@@ -51,10 +51,12 @@ const MONO_THEMES = [
 ];
 
 export function ThemeSelector() {
-  const { activeTheme, setActiveTheme } = useThemeConfig({defaultTheme: 'default'});
+  const { activeTheme, setActiveTheme } = useThemeConfig({
+    defaultTheme: 'default'
+  });
 
   return (
-    <div className='flex items-center gap-2'>
+    <div className='hidden md:flex items-center md:gap-2'>
       <Label htmlFor='theme-selector' className='sr-only'>
         Theme
       </Label>
@@ -63,10 +65,8 @@ export function ThemeSelector() {
           id='theme-selector'
           className='justify-start *:data-[slot=select-value]:w-12'
         >
-          <span className='text-muted-foreground hidden sm:block'>
-            Select a theme:
-          </span>
-          <span className='text-muted-foreground block sm:hidden'>Theme</span>
+          <span className='text-muted-foreground hidden sm:block'>theme:</span>
+
           <SelectValue placeholder='Select a theme' />
         </SelectTrigger>
         <SelectContent align='end'>

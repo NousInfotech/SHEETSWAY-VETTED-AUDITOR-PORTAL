@@ -26,7 +26,7 @@ export const ConnectHeader: React.FC<ConnectHeaderProps> = ({
   messages
 }) => {
   return (
-    <div className="bg-card border-b border-border p-4">
+    <div className="bg-card border-b border-border p-4 rounded-t-lg">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Messaging & Meetings</h1>
         <div className="flex items-center space-x-3">

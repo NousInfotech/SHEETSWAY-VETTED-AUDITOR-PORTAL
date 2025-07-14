@@ -66,3 +66,14 @@ export function AreaGraph() {
     </Card>
   );
 }
+
+
+
+
+
+
+
+
+
+
+

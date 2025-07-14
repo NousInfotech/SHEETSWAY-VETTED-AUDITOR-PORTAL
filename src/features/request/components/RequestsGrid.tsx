@@ -2,6 +2,22 @@ import React from 'react';
 import { EngagementRequest } from '../types/request';
 import { getUrgencyColor, formatDate, downloadAllAttachments } from '../utils';
 
+// Import icons for a more visual and intuitive UI
+import {
+  Bookmark,
+  DollarSign,
+  CalendarDays,
+  Briefcase,
+  Paperclip,
+  UserCircle,
+  Eye,
+  Send,
+  CheckCircle,
+  FileSearch,
+  File,
+  Download
+} from 'lucide-react';
+
 interface RequestsGridProps {
   requests: EngagementRequest[];
   bookmarkedRequests: number[];
@@ -21,132 +37,212 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
 }) => {
   if (requests.length === 0) {
     return (
-      <div className="text-center py-12">
-        <span className="block text-lg font-medium text-foreground mb-2">No requests found</span>
-        <span className="text-muted-foreground">Try adjusting your search criteria or filters</span>
+      <div className='flex flex-col items-center justify-center px-6 py-20 text-center'>
+        <FileSearch
+          className='text-muted-foreground/50 mb-6 h-20 w-20'
+          strokeWidth={1}
+        />
+        <h3 className='text-foreground mb-2 text-xl font-semibold'>
+          No Requests Found
+        </h3>
+        <p className='text-muted-foreground max-w-sm'>
+          There are currently no engagement requests that match your criteria.
+          Try adjusting your search or filters.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {requests.map((request) => (
-        <div key={request.id} className="bg-card rounded-lg border border-border hover:shadow-lg transition-shadow">
-          <div className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-3 py-1 bg-muted text-foreground rounded-full text-sm font-medium">
-                    {request.type}
-                  </span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getUrgencyColor(request.urgency)}`}>
-                    {request.urgency}
-                  </span>
-                  {request.tags.map((tag, index) => (
-                    <span key={index} className="px-2 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200 rounded text-xs">
-                      {tag}
+    <div className='space-y-6'>
+      {requests.map((request) => {
+        const isBookmarked = bookmarkedRequests.includes(request.id);
+        const hasSubmitted = isProposalSubmitted(request.id);
+
+        return (
+          <div
+            key={request.id}
+            className='bg-card text-card-foreground rounded-xl border shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg'
+          >
+            <div className='p-5 sm:p-6'>
+              {/* --- Card Header --- */}
+              <div className='mb-4 flex items-start justify-between'>
+                <div className='flex-1'>
+                  {/* Tags and Badges */}
+                  <div className='mb-3 flex flex-wrap items-center gap-2'>
+                    <span className='bg-primary/10 text-primary inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold'>
+                      {request.type}
                     </span>
-                  ))}
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
-                  {request.industry} - {request.size} Business
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Framework: {request.framework} • Submitted: {formatDate(request.submittedDate)}
-                </p>
-              </div>
-              <button
-                onClick={() => onToggleBookmark(request.id)}
-                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {bookmarkedRequests.includes(request.id) ? (
-                  <span className="text-primary">★</span>
-                ) : (
-                  <span>☆</span>
-                )}
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="text-foreground">{request.budget}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-foreground">Due: {formatDate(request.deadline)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-foreground">{request.attachments.length} attachments</span>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-medium text-foreground mb-2">Project Notes:</h4>
-                <p className="text-muted-foreground text-sm">{request.notes}</p>
-              </div>
-
-              {request.attachments.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-foreground mb-2">Attachments:</h4>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {request.attachments.map((attachment, index) => (
-                      <span key={index} className="px-2 py-1 bg-muted text-foreground rounded text-sm">
-                        {attachment}
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${getUrgencyColor(request.urgency)}`}
+                    >
+                      {request.urgency}
+                    </span>
+                    {request.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className='inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/50 dark:text-blue-300'
+                      >
+                        {tag}
                       </span>
                     ))}
                   </div>
-                  <button
-                    onClick={() => downloadAllAttachments(request.attachments)}
-                    className="px-3 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors text-sm font-medium"
-                  >
-                    Download All Attachments
-                  </button>
+
+                  {/* Main Title */}
+                  <h3 className='text-foreground text-lg font-bold sm:text-xl'>
+                    {request.industry} - {request.size} Business
+                  </h3>
+                  <p className='text-muted-foreground mt-1 text-sm'>
+                    Framework: {request.framework} • Submitted:{' '}
+                    {formatDate(request.submittedDate)}
+                  </p>
+                </div>
+
+                {/* Bookmark Button with Icon */}
+                <button
+                  onClick={() => onToggleBookmark(request.id)}
+                  className='text-muted-foreground hover:bg-muted hover:text-primary ml-4 rounded-full p-2 transition-colors'
+                  aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                >
+                  <Bookmark
+                    size={22}
+                    className={`transition-all duration-200 ${isBookmarked ? 'fill-primary text-primary' : 'fill-transparent'}`}
+                  />
+                </button>
+              </div>
+
+              {/* --- Key Information Section with Icons --- */}
+              <div className='border-border my-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-b py-4 text-sm md:grid-cols-4'>
+                <div className='text-foreground flex items-center gap-2'>
+                  <DollarSign className='text-muted-foreground h-4 w-4' />
+                  <span className='font-medium'>{request.budget}</span>
+                </div>
+                <div className='text-foreground flex items-center gap-2'>
+                  <CalendarDays className='text-muted-foreground h-4 w-4' />
+                  <span>Due: {formatDate(request.deadline)}</span>
+                </div>
+                <div className='text-foreground flex items-center gap-2'>
+                  <Briefcase className='text-muted-foreground h-4 w-4' />
+                  <span>{request.industry}</span>
+                </div>
+                <div className='text-foreground flex items-center gap-2'>
+                  <Paperclip className='text-muted-foreground h-4 w-4' />
+                  <span>
+                    {request.attachments.length} attachment
+                    {request.attachments.length > 1 ? 's' : ''}
+                  </span>
+                </div>
+              </div>
+
+              {/* Project Notes */}
+              <div>
+                <h4 className='text-foreground mb-2 font-semibold'>
+                  Project Notes
+                </h4>
+                <p className='text-muted-foreground line-clamp-3 text-sm'>
+                  {request.notes}
+                </p>
+              </div>
+
+              {request.attachments.length > 0 && (
+                <div className='mt-5'>
+                  <h4 className='text-foreground mb-3 font-semibold'>
+                    Attachments
+                  </h4>
+                  <div className='flex flex-col gap-2'>
+                    <div className='flex flex-wrap gap-2'>
+                      {request.attachments.map((attachment, index) => (
+                        <div
+                          key={index}
+                          className='bg-muted/70 text-muted-foreground flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm font-medium'
+                        >
+                          <File size={14} className='flex-shrink-0' />
+                          <span className='truncate'>{attachment}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() =>
+                        downloadAllAttachments(request.attachments)
+                      }
+                      className='text-primary hover:bg-primary/10 mt-2 inline-flex items-center gap-2 self-start rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium transition-colors'
+                    >
+                      <Download size={14} />
+                      Download All
+                    </button>
+                  </div>
                 </div>
               )}
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                <div className="flex items-center gap-3">
+              {/* --- Card Footer: Client Info & Actions --- */}
+              <div className='border-border mt-5 flex flex-col items-start justify-between gap-4 border-t pt-5 sm:flex-row sm:items-center'>
+                {/* Client Info */}
+                <div className='flex items-center gap-3'>
                   {request.anonymous ? (
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded-full text-sm">
-                      Anonymous Request
-                    </span>
+                    <>
+                      <UserCircle className='text-muted-foreground/80 h-9 w-9' />
+                      <div className='text-sm'>
+                        <span className='text-foreground font-semibold'>
+                          Anonymous Client
+                        </span>
+                        <p className='text-muted-foreground'>
+                          Identity protected
+                        </p>
+                      </div>
+                    </>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-primary font-medium text-sm">
-                          {request.clientName?.split(' ').map(n => n[0]).join('')}
+                    <>
+                      <div className='bg-primary/10 ring-primary/20 flex h-9 w-9 items-center justify-center rounded-full ring-2'>
+                        <span className='text-primary text-sm font-bold'>
+                          {request.clientName
+                            ?.split(' ')
+                            .map((n) => n[0])
+                            .join('')}
                         </span>
                       </div>
-                      <span className="text-foreground font-medium">{request.clientName}</span>
-                    </div>
+                      <div className='text-sm'>
+                        <span className='text-foreground font-semibold'>
+                          {request.clientName}
+                        </span>
+                        <p className='text-muted-foreground'>Verified Client</p>
+                      </div>
+                    </>
                   )}
                 </div>
-                <div className="flex gap-3">
+
+                {/* Action Buttons */}
+                <div className='flex w-full items-center gap-3 sm:w-auto'>
                   <button
                     onClick={() => onPreview(request)}
-                    className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors bg-card text-foreground"
+                    className='border-border hover:bg-muted bg-card text-foreground flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors sm:flex-none'
                   >
+                    <Eye size={16} />
                     Preview
                   </button>
                   <button
                     onClick={() => onSubmitProposal(request)}
-                    disabled={isProposalSubmitted(request.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                      isProposalSubmitted(request.id)
-                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                    disabled={hasSubmitted}
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none ${
+                      hasSubmitted
+                        ? 'cursor-default bg-green-600/90 text-white'
                         : 'bg-primary text-primary-foreground hover:bg-primary/90'
                     }`}
                   >
-                    {isProposalSubmitted(request.id) ? 'Submitted' : 'Submit Proposal'}
+                    {hasSubmitted ? (
+                      <CheckCircle size={16} />
+                    ) : (
+                      <Send size={16} />
+                    )}
+                    {hasSubmitted ? 'Submitted' : 'Submit Proposal'}
                   </button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
 
-export default RequestsGrid; 
+export default RequestsGrid;
