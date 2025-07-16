@@ -1082,6 +1082,10 @@ export function AuditFirmRegistrationForm() {
   }
 
   return (
+    <>
+    <div className='max-w-7xl text-end'>
+      <Button onClick={() => router.push("/dashboard/overview")}>Dashboard</Button>
+    </div>
     <Card className='mx-auto my-8 w-full max-w-4xl shadow-lg'>
       <CardHeader>
         <CardTitle className='text-3xl font-bold tracking-tight'>
@@ -1632,5 +1636,6 @@ export function AuditFirmRegistrationForm() {
         </Form>
       </CardContent>
     </Card>
+    </>
   );
 }
