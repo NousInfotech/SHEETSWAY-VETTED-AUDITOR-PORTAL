@@ -50,7 +50,15 @@ export const navItems: NavItem[] = [
     url: '/dashboard/profile',
     icon: 'user',
     isActive: false,
-    shortcut: ['p', 'c'],
+    shortcut: ['c', 'c'],
+    items: []
+  },
+  {
+    title: 'Teams',
+    url: '/dashboard/teams',
+    icon: 'users',
+    isActive: false,
+    shortcut: ['t', 't'],
     items: []
   },
   // {

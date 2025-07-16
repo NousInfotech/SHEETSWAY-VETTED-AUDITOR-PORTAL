@@ -37,6 +37,9 @@ import {
   IconClock,
   IconRefresh
 } from '@tabler/icons-react';
+import { Users } from 'lucide-react';
+
+
 
 export type Icon = React.ComponentType<IconProps>;
 
@@ -80,4 +83,5 @@ export const Icons = {
   history: IconClock,
   payments: IconCreditCard,
   refresh: IconRefresh,
+  users: Users,
 };

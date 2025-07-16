@@ -20,7 +20,7 @@ const ProfileCompliancePage = () => {
   const state = useProfileState();
   React.useEffect(() => {
     state.setIsDark(resolvedTheme === 'dark');
-  }, [resolvedTheme]);
+  }, [resolvedTheme, state]);
 
   const renderContent = () => {
     switch (state.activeSection) {

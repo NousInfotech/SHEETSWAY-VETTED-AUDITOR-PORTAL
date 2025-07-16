@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, Video, Settings, Paperclip, Send, Image, Download } from 'lucide-react';
+import { Phone, Video, Settings, Paperclip, Send, Image as Img, Download } from 'lucide-react';
 import { Chat, MessageFilter } from '../types';
 import { getFileIcon } from '../utils';
 
@@ -48,7 +48,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   }
 
   const getFileIconComponent = (type: string) => {
-    if (type.includes('image')) return <Image className="w-4 h-4" />;
+    if (type.includes('image')) return <Img className="w-4 h-4"/>;
     return <div className="w-4 h-4" />;
   };
 
