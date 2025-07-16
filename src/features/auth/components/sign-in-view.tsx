@@ -33,7 +33,7 @@ export default function SignInViewPage({
     setError('');
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard/overview');
+      router.push('/auth/audit-firm');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -47,7 +47,7 @@ export default function SignInViewPage({
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      router.push('/dashboard/overview');
+      router.push('/auth/audit-firm');
     } catch (err: any) {
       setError(err.message);
     } finally {
