@@ -75,9 +75,10 @@ export default function SignInViewPage({
         {/* Testimonial */}
         <div className='space-y-6'>
           <blockquote className='text-lg leading-relaxed text-white'>
-            &ldquo;Shadcn UI Kit for Figma has completely transformed our design
-            process. It&apos;s incredibly intuitive and saves us so much time.
-            The components are beautifully crafted and customizable.&rdquo;
+            &ldquo;Sheetsway is a centralized platform designed to manage every
+            aspect of the audit process, enhancing both efficiency and accuracy.
+            It leverages AI, OCR, and custom risk-based auditing to streamline
+            financial audits and deliver smarter, faster results.&rdquo;
           </blockquote>
 
           <div className='flex items-center space-x-4'>
@@ -87,7 +88,7 @@ export default function SignInViewPage({
             <div>
               <div className='font-semibold text-white'>Sarah Thompson</div>
               <div className='text-sm text-gray-400'>
-                Lead UX Designer at BrightWave Solutions
+                Project Manager
               </div>
             </div>
           </div>
@@ -95,7 +96,7 @@ export default function SignInViewPage({
 
         {/* Footer */}
         <div className='text-sm text-gray-500'>
-          © 2024 ShadcnUI. All rights reserved.
+          © 2024 Sheetsway. All rights reserved.
         </div>
       </div>
 
@@ -181,9 +182,9 @@ export default function SignInViewPage({
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    isDark 
-                      ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700' 
+                  className={`h-10 w-full rounded-md border px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none ${
+                    isDark
+                      ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700'
                       : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
                   }`}
                 />
@@ -213,9 +214,9 @@ export default function SignInViewPage({
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className={`w-full h-10 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    isDark 
-                      ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700' 
+                  className={`h-10 w-full rounded-md border px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none ${
+                    isDark
+                      ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:bg-gray-700'
                       : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:bg-white'
                   }`}
                 />
@@ -223,7 +224,7 @@ export default function SignInViewPage({
 
               {/* Error Message */}
               {error && (
-                <div className='text-center text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-800'>
+                <div className='rounded-md border border-red-200 bg-red-50 p-3 text-center text-sm text-red-500 dark:border-red-800 dark:bg-red-900/20'>
                   {error}
                 </div>
               )}
@@ -231,7 +232,7 @@ export default function SignInViewPage({
               {/* Sign In Button */}
               <Button
                 type='submit'
-                className="w-full bg-white text-black hover:bg-gray-100"
+                className='w-full bg-white text-black hover:bg-gray-100'
                 disabled={loading}
               >
                 {loading ? 'Signing in...' : 'Sign in'}
@@ -259,9 +260,9 @@ export default function SignInViewPage({
                 variant='outline'
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className={`w-full h-10 font-medium rounded-md transition-colors flex items-center justify-center gap-3 ${
-                  isDark 
-                    ? 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700' 
+                className={`flex h-10 w-full items-center justify-center gap-3 rounded-md font-medium transition-colors hover:text-slate-400  ${
+                  isDark
+                    ? 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'
                     : 'border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
                 }`}
               >

@@ -103,7 +103,7 @@ export default function SignUpViewPage({
 
         {/* Footer */}
         <div className='text-sm text-gray-500'>
-          © 2024 ShadcnUI. All rights reserved.
+          © 2024 Sheetsway. All rights reserved.
         </div>
       </div>
 
