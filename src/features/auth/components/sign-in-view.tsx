@@ -3,7 +3,8 @@ import { useState } from 'react';
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signOut
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,10 @@ import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+
+import { toast } from 'sonner';
+import { getProfileOnSignIn } from '@/lib/services/userService';
+import { useProfileStore } from '@/stores/useProfileStore';
 
 interface SignInViewPageProps {
   isDark?: boolean;
@@ -27,31 +32,68 @@ export default function SignInViewPage({
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+
+  const setProfile = useProfileStore((state) => state.setProfile);
+
+  
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/auth/audit-firm');
+      // Step 1: Authenticate with Firebase
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const token = await userCredential.user.getIdToken();
+      
+       // Step 2: Fetch the profile data. This also verifies the user exists.
+      const profileData = await getProfileOnSignIn(token, 'AUDITOR'); // Specify the role
+      
+      if (!profileData) {
+        // If they don't exist, sign them out of Firebase and show an error.
+        await signOut(auth);
+        toast.error("Account Not Found", { description: "No account found with this email. Please sign up first." });
+        throw new Error("No account found with this email. Please sign up first.");
+      }
+      
+      // Step 3: If they exist, proceed
+      setProfile(profileData);
+
+      toast.success("Welcome back!");
+      router.push('/dashboard/overview'); // Redirect to dashboard
+
     } catch (err: any) {
-      setError(err.message);
+      let userFriendlyMessage = err.message;
+      if (err.code === 'auth/invalid-credential') {
+        userFriendlyMessage = "Invalid email or password. Please try again.";
+      }
+      setError(userFriendlyMessage);
+      toast.error("Sign-in Failed", { description: userFriendlyMessage });
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    // ... logic would be identical to handleSignIn
     setLoading(true);
     setError('');
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      router.push('/auth/audit-firm');
+        const result = await signInWithPopup(auth, new GoogleAuthProvider());
+        const token = await result.user.getIdToken();
+        const profileData = await getProfileOnSignIn(token, 'AUDITOR');
+        if (!profileData) {
+            await signOut(auth);
+            throw new Error("No account is associated with this Google account. Please sign up first.");
+        }
+        setProfile(profileData);
+        toast.success("Welcome back!");
+        router.push('/dashboard/overview');
     } catch (err: any) {
-      setError(err.message);
+        setError(err.message);
+        toast.error("Sign-in Failed", { description: err.message });
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -306,3 +348,10 @@ export default function SignInViewPage({
     </div>
   );
 }
+
+
+
+
+
+
+

@@ -246,6 +246,8 @@ export default function DashboardComponent({
 }) {
   const { user } = useAuth();
 
+  console.log(user)
+
   return (
     <PageContainer>
       <div className='flex flex-1 flex-col space-y-4 pb-10'>

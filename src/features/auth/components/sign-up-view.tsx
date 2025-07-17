@@ -5,14 +5,19 @@ import { auth } from '@/lib/firebase';
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  updateProfile // Import updateProfile
 } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import type React from 'react';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation'; // Use useRouter instead of redirect
 import Image from 'next/image';
+import { toast } from 'sonner';
+
+// Import the new API service function
+import { createBackendUser } from '@/lib/services/userService';
 
 interface SignUpViewPageProps {
   isDark?: boolean;
@@ -23,44 +28,85 @@ export default function SignUpViewPage({
   isDark = false,
   onToggleTheme
 }: SignUpViewPageProps) {
+  // Add state for the full name, which is required by your backend
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter(); // Use the router for client-side navigation
 
+  // --- LOGIC CHANGE 1: UPDATED EMAIL/PASSWORD SIGN-UP ---
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
     setLoading(true);
     setError('');
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // Redirect or show success as needed
+      // Step 1: Create the user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      // Step 2 (Important): Update the Firebase user's profile with the display name
+      // This makes it available for the backend creation step
+      await updateProfile(userCredential.user, { displayName: fullName });
+
+      // Step 3: Create the corresponding user in your backend database
+      await createBackendUser(userCredential.user);
+
+      toast.success('Account created successfully!', {
+        description: 'Redirecting you to the next step...'
+      });
+
+      // Step 4: Redirect to the next part of the onboarding flow
+      router.push('/auth/audit-firm'); // Or another appropriate page
     } catch (err: any) {
-      setError(err.message);
+      // Clear the local error message and show a toast instead
+      setError('');
+      toast.error('Sign-up Failed', { description: err.message });
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
+  // --- LOGIC CHANGE 2: UPDATED GOOGLE SIGN-UP ---
   const handleGoogleSignUp = async () => {
     setLoading(true);
     setError('');
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      // Step 1: Sign in with Google via Firebase popup
+      const result = await signInWithPopup(auth, provider);
+
+      // Step 2: Create the corresponding user in your backend
+      // The `displayName` is automatically populated by Google
+      await createBackendUser(result.user);
+
+      toast.success('Signed in with Google successfully!', {
+        description: 'Redirecting you to the next step...'
+      });
+
+      // Step 3: Redirect
+      router.push('/auth/audit-firm');
     } catch (err: any) {
-      setError(err.message);
+      setError('');
+      toast.error('Google Sign-in Failed', { description: err.message });
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
+
+  // --- NO CHANGES TO THE UI (JSX) BELOW, EXCEPT FOR ADDING ONE FIELD ---
 
   return (
     <div className={`flex min-h-screen ${isDark ? 'bg-gray-950' : 'bg-white'}`}>
@@ -68,7 +114,6 @@ export default function SignUpViewPage({
       <div
         className={`hidden lg:flex lg:w-1/2 ${isDark ? 'bg-black' : 'bg-black'} flex-col justify-between p-12`}
       >
-        {/* Logo/Brand */}
         <div className='flex items-center space-x-3'>
           <Image
             src={'/assets/sheetswaylogo.png'}
@@ -79,15 +124,12 @@ export default function SignUpViewPage({
             className='object-contain'
           />
         </div>
-
-        {/* Testimonial */}
         <div className='space-y-6'>
           <blockquote className='text-lg leading-relaxed text-white'>
-            &ldquo;The onboarding process was seamless and the interface is
-            incredibly user-friendly. Within minutes, I was able to set up my
-            account and start exploring all the amazing features.&rdquo;
+            “The onboarding process was seamless and the interface is incredibly
+            user-friendly. Within minutes, I was able to set up my account and
+            start exploring all the amazing features.”
           </blockquote>
-
           <div className='flex items-center space-x-4'>
             <div className='flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-blue-500'>
               <span className='text-sm font-semibold text-white'>MJ</span>
@@ -100,8 +142,6 @@ export default function SignUpViewPage({
             </div>
           </div>
         </div>
-
-        {/* Footer */}
         <div className='text-sm text-gray-500'>
           © 2024 Sheetsway. All rights reserved.
         </div>
@@ -111,7 +151,6 @@ export default function SignUpViewPage({
       <div
         className={`flex flex-1 flex-col ${isDark ? 'bg-gray-950' : 'bg-white'} relative`}
       >
-        {/* Theme Toggle Button */}
         {onToggleTheme && (
           <div className='absolute top-6 right-6'>
             <Button
@@ -153,10 +192,8 @@ export default function SignUpViewPage({
           </div>
         )}
 
-        {/* Form Container */}
         <div className='flex flex-1 items-center justify-center p-8'>
           <div className='w-full max-w-md space-y-6'>
-            {/* Header */}
             <div className='space-y-2 text-center'>
               <h1
                 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}
@@ -170,10 +207,25 @@ export default function SignUpViewPage({
                 for you.
               </p>
             </div>
-
-            {/* Form */}
             <form onSubmit={handleSignUp} className='space-y-4'>
-              {/* Email Input */}
+              {/* Added Full Name input field - This is required by your backend */}
+              <div className='space-y-2'>
+                <label
+                  className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}
+                >
+                  Full Name
+                </label>
+                <Input
+                  type='text'
+                  placeholder='Enter your full name'
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  disabled={loading}
+                  className={`${isDark ? 'border-gray-700 bg-black text-white placeholder-gray-500' : 'border-gray-300 bg-white text-black'}`}
+                />
+              </div>
+
               <div className='space-y-2'>
                 <label
                   className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}
@@ -187,11 +239,9 @@ export default function SignUpViewPage({
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={loading}
-                  className={`${isDark ? 'border-gray-700 bg-black text-white placeholder-gray-500' : 'border-gray-300 bg-white'}`}
+                  className={`${isDark ? 'border-gray-700 bg-black text-white placeholder-gray-500' : 'border-gray-300 bg-white text-black'}`}
                 />
               </div>
-
-              {/* Password Input */}
               <div className='space-y-2'>
                 <label
                   className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}
@@ -205,11 +255,9 @@ export default function SignUpViewPage({
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className={`${isDark ? 'border-gray-700 bg-black text-white placeholder-gray-500' : 'border-gray-300 bg-white'}`}
+                  className={`${isDark ? 'border-gray-700 bg-black text-white placeholder-gray-500' : 'border-gray-300 bg-white text-black'}`}
                 />
               </div>
-
-              {/* Confirm Password Input */}
               <div className='space-y-2'>
                 <label
                   className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}
@@ -223,16 +271,14 @@ export default function SignUpViewPage({
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   disabled={loading}
-                  className={`${isDark ? 'border-gray-700 bg-black text-white placeholder-gray-500' : 'border-gray-300 bg-white'}`}
+                  className={`${isDark ? 'border-gray-700 bg-black text-white placeholder-gray-500' : 'border-gray-300 bg-white text-black'}`}
                 />
               </div>
 
-              {/* Error Message */}
               {error && (
                 <div className='text-center text-sm text-red-500'>{error}</div>
               )}
 
-              {/* Terms and Conditions */}
               <div
                 className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
               >
@@ -253,7 +299,6 @@ export default function SignUpViewPage({
                 .
               </div>
 
-              {/* Sign Up Button */}
               <Button
                 type='submit'
                 className='w-full bg-white text-black hover:bg-gray-100'
@@ -262,7 +307,6 @@ export default function SignUpViewPage({
                 {loading ? 'Creating account...' : 'Create account'}
               </Button>
 
-              {/* Divider */}
               <div className='relative'>
                 <div className='absolute inset-0 flex items-center'>
                   <span
@@ -278,7 +322,6 @@ export default function SignUpViewPage({
                 </div>
               </div>
 
-              {/* Social Login Buttons */}
               <div className='grid grid-cols-3 gap-3'>
                 <Button
                   type='button'
@@ -306,7 +349,6 @@ export default function SignUpViewPage({
                     />
                   </svg>
                 </Button>
-
                 <Button
                   type='button'
                   variant='outline'
@@ -321,7 +363,6 @@ export default function SignUpViewPage({
                     <path d='M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z' />
                   </svg>
                 </Button>
-
                 <Button
                   type='button'
                   variant='outline'
@@ -337,8 +378,6 @@ export default function SignUpViewPage({
                   </svg>
                 </Button>
               </div>
-
-              {/* Sign In Link */}
               <div
                 className={`text-center text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
               >

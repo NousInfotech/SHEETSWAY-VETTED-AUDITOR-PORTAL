@@ -37,7 +37,7 @@ import {
   IconClock,
   IconRefresh
 } from '@tabler/icons-react';
-import { Users } from 'lucide-react';
+import { Gem, Users } from 'lucide-react';
 
 
 
@@ -84,4 +84,5 @@ export const Icons = {
   payments: IconCreditCard,
   refresh: IconRefresh,
   users: Users,
+  proposalIcon: Gem
 };

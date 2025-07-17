@@ -30,6 +30,14 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
+    title: 'Proposals',
+    url: '/dashboard/my-proposals',
+    icon: 'proposalIcon',
+    isActive: false,
+    shortcut: ['p', 'p'],
+    items: []
+  },
+  {
     title: 'Active Engagements',
     url: '/dashboard/engagements',
     icon: 'engagements',
