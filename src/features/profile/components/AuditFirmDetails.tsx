@@ -1,5 +1,6 @@
 import React from 'react';
 import { Building2, Edit2, X, Save, Upload, Plus } from 'lucide-react';
+import Image from 'next/image';
 
 const AuditFirmDetails = ({
   firmData,
@@ -73,7 +74,7 @@ const AuditFirmDetails = ({
           Logo Upload
         </label>
         <div className={`border-2 border-dashed ${isDark ? 'border-border' : 'border-gray-200'} rounded-lg p-4 text-center relative`}>
-          {logoPreview && <img src={logoPreview} alt="Logo Preview" className="mx-auto mb-2 h-16 object-contain" />}
+          {logoPreview && <Image src={logoPreview} alt="Logo Preview" className="mx-auto mb-2 h-16 object-contain" />}
           {isEditingFirm ? (
             <>
               <input
