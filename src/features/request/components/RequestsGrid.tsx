@@ -456,10 +456,10 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
 
 
         <SubmitProposalDialog
-          request={selectedClientRequest}
+          request={selectedClientRequest!}
           isOpen={!!isSubmitModelOpen}
           onClose={onCloseSubmitModel}
-          handleSubmitProposal={handleSubmitProposal}
+          
          />
          
       
