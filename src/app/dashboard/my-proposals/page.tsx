@@ -50,7 +50,7 @@ export default function MyProposalsPage() {
     }
   }, [user, authLoading]); 
 
-
+  console.log(user)
   // 5. Render UI based on the current state.
   const renderContent = () => {
     if (isLoading) {

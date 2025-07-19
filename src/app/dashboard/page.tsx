@@ -39,6 +39,7 @@ export default function Dashboard() {
       }
     }
   }, [user, loading, router]);
+  console.log(user)
 
   return (
     <div className='flex h-screen w-full items-center justify-center'>

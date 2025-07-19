@@ -50,6 +50,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { X, Loader2, PlusCircle, Trash2, CalendarIcon } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useProfileStore } from '@/stores/useProfileStore';
 
 type FormValues = z.infer<typeof ProposalFormSchema>;
 
@@ -87,6 +88,7 @@ export function CreateProposalForm({
 }: CreateProposalFormProps) {
   const { user } = useAuth();
   const router = useRouter();
+  const profile = useProfileStore.getState().profile;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
@@ -118,11 +120,11 @@ export function CreateProposalForm({
     setIsSubmitting(true);
 
     try {
-      // --- THIS IS THE FINAL, CORRECTED PAYLOAD ---
+      
       const requestBody = {
         clientRequestId,
-        auditorId,
-        auditFirmId,
+        auditorId: profile?.id,
+        auditFirmId: profile?.auditFirmId,
         proposalName: data.proposalName,
         description: data.description,
         quotation: Math.round(data.quotation * 100),
@@ -134,11 +136,12 @@ export function CreateProposalForm({
         terms: data.terms?.map((t) => t.value).filter(Boolean) || [],
         deliverables:
           data.deliverables?.map((d) => d.value).filter(Boolean) || [],
-        // Add the status field to match the backend schema
-        status: 'PENDING' as const // Use `as const` for type safety
+        
+        status: 'PENDING' as const 
       };
 
       await createProposal(requestBody);
+      console.log(requestBody)
 
       toast.success('Proposal Submitted Successfully! 🚀');
 
@@ -158,7 +161,7 @@ export function CreateProposalForm({
       setIsSubmitting(false);
     }
   }
-
+  console.log(profile)
   return (
     <Card className='mx-auto my-8 w-full max-w-4xl shadow-lg'>
       <CardHeader>

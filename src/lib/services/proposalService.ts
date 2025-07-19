@@ -80,7 +80,7 @@ export async function getProposals(): Promise<Proposal[] | null> {
 
 
 
-export async function createProposal(proposalData: CreateProposalPayload): Promise<Proposal> {
+export async function createProposal(proposalData:any): Promise<Proposal> {
   const apiEndpoint = '/api/v1/proposals';
 
   try {

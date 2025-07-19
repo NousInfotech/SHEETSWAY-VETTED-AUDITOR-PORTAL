@@ -1,3 +1,5 @@
+import { ClientRequest } from "@/lib/services/clientRequestService";
+
 // types/index.ts
 export interface EngagementRequest {
     id: number;

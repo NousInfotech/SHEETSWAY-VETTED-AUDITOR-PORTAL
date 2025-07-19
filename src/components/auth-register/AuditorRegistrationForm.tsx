@@ -1,23 +1,678 @@
+// 'use client';
+
+// import { zodResolver } from '@hookform/resolvers/zod';
+// import { useForm, useFieldArray } from 'react-hook-form';
+// import * as z from 'zod';
+// import {
+//   AuditorFormSchema,
+//   AuditorRole,
+//   Currency,
+//   AccountStatus
+// } from '@/lib/validators/auditor-schema';
+// import { AuditorProfile } from '@/stores/useProfileStore';
+// import { toast } from 'sonner';
+// import axios from 'axios';
+// import {
+//   createAuditor,
+//   updateAuditor,
+//   UpdateAuditorPayload,
+//   CreateAuditorPayload
+// } from '@/lib/services/auditorService';
+// import { Button } from '@/components/ui/button';
+// import {
+//   Card,
+//   CardContent,
+//   CardHeader,
+//   CardTitle,
+//   CardDescription
+// } from '@/components/ui/card';
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormLabel,
+//   FormMessage
+// } from '@/components/ui/form';
+// import { Input } from '@/components/ui/input';
+// import {
+//   Select,
+//   SelectTrigger,
+//   SelectValue,
+//   SelectContent,
+//   SelectItem
+// } from '@/components/ui/select';
+// import { MultiSelectCreatable } from '@/components/ui/multi-select-creatable';
+// import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
+// import { useState, useEffect } from 'react';
+// import { cn } from '@/lib/utils';
+// import { format } from 'date-fns';
+
+// import { auth } from '@/lib/firebase';
+// import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth';
+// import { createBackendUser } from '@/lib/services/userService';
+
+// type FormValues = z.infer<typeof AuditorFormSchema>;
+
+// interface AuditorRegistrationFormProps {
+//   auditorToEdit?: AuditorProfile | null;
+//   onFormSubmit?: () => void;
+//   isModalMode?: boolean;
+// }
+
+// const PREDEFINED_SPECIALTIES = [
+//   'IFRS',
+//   'Tax Compliance',
+//   'Smart Contract Audit'
+// ];
+// const PREDEFINED_LANGUAGES = ['English', 'Arabic', 'German', 'Spanish'];
+
+// export function AuditorRegistrationForm({
+//   auditorToEdit,
+//   onFormSubmit,
+//   isModalMode = false
+// }: AuditorRegistrationFormProps) {
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const isEditMode = !!auditorToEdit;
+
+//   // The useAuth hook is not needed for this component's logic,
+//   // as the admin's auth state is handled by the axios interceptor.
+
+//   const form = useForm<FormValues>({
+//     resolver: zodResolver(AuditorFormSchema),
+//     defaultValues: {
+//       name: '',
+//       licenseNumber: '',
+//       role: undefined,
+//       yearsExperience: 0,
+//       payoutCurrency: null,
+//       accountStatus: AccountStatus.PENDING,
+//       stripeAccountId: '',
+//       specialties: [],
+//       languages: [],
+//       portfolioLinks: [],
+//       email: '',
+//       password: '',
+//       confirmPassword: ''
+//     },
+//     mode: 'onChange'
+//   });
+
+//   useEffect(() => {
+//     if (isEditMode && auditorToEdit) {
+//       form.reset({
+//         name: auditorToEdit.name,
+//         email: auditorToEdit.email,
+//         licenseNumber: auditorToEdit.licenseNumber,
+//         role: auditorToEdit.role,
+//         yearsExperience: auditorToEdit.yearsExperience,
+//         payoutCurrency: auditorToEdit.payoutCurrency,
+//         accountStatus: auditorToEdit.accountStatus,
+//         stripeAccountId: auditorToEdit.stripeAccountId || '',
+//         specialties: auditorToEdit.specialties,
+//         languages: auditorToEdit.languages,
+//         portfolioLinks:
+//           auditorToEdit.portfolioLinks?.map((link) => ({ value: link })) || []
+//       });
+//     }
+//     // The dependency array should include `form.reset`
+//   }, [auditorToEdit, isEditMode, form.reset]);
+
+//   const {
+//     fields: portfolioFields,
+//     append: appendPortfolioLink,
+//     remove: removePortfolioLink
+//   } = useFieldArray({
+//     name: 'portfolioLinks',
+//     control: form.control
+//   });
+
+//   async function onSubmit(data: FormValues) {
+//     setIsSubmitting(true);
+
+//     try {
+//       if (isEditMode && auditorToEdit) {
+//         const payload: UpdateAuditorPayload = {
+//           name: data.name,
+//           licenseNumber: data.licenseNumber,
+//           yearsExperience: data.yearsExperience,
+//           role: data.role,
+//           accountStatus: data.accountStatus,
+//           stripeAccountId: data.stripeAccountId,
+//           specialties: data.specialties,
+//           languages: data.languages,
+//           payoutCurrency: data.payoutCurrency,
+//           portfolioLinks: data.portfolioLinks
+//             ?.map((link) => link.value)
+//             .filter(Boolean)
+//         };
+//         await updateAuditor(auditorToEdit.id, payload);
+//         toast.success('Profile updated successfully!');
+//       } else {
+//         // Zod validation already ensures these fields exist and passwords match
+//         if (!data.email || !data.password || !data.role) {
+//           throw new Error(
+//             'Form data is incomplete. This should not happen if validation is working.'
+//           );
+//         }
+
+//         // Step 1: Create Firebase user first
+//         const userCredential = await createUserWithEmailAndPassword(
+//           auth,
+//           data.email,
+//           data.password
+//         );
+//         const firebaseUser = userCredential.user;
+
+//         // Step 2: Try to create the backend records. If this fails, delete the Firebase user.
+//         try {
+//           const newBackendUser = await createBackendUser(firebaseUser);
+//           if (!newBackendUser?.auth?.firebaseId) {
+//             throw new Error(
+//               'Failed to create the base user record in the backend.'
+//             );
+//           }
+
+//           const payload: CreateAuditorPayload = {
+//             auth: {
+//               firebaseId: newBackendUser.auth.firebaseId,
+//               email: newBackendUser.auth.email
+//             },
+//             auditor: {
+//               name: data.name,
+//               licenseNumber: data.licenseNumber,
+//               role: data.role,
+//               yearsExperience: data.yearsExperience,
+//               accountStatus: AccountStatus.PENDING,
+//               payoutCurrency: data.payoutCurrency,
+//               specialties: data.specialties,
+//               languages: data.languages,
+//               portfolioLinks: data.portfolioLinks
+//                 ?.map((link) => link.value)
+//                 .filter(Boolean),
+//               stripeAccountId: data.stripeAccountId
+//             }
+//           };
+
+//           await createAuditor(payload);
+//           toast.success('Auditor account and profile created successfully!');
+//         } catch (backendError) {
+//           // --- ATOMIC OPERATION: Rollback Firebase user creation if backend fails ---
+//           console.error(
+//             'Backend creation failed, attempting to delete Firebase user...'
+//           );
+//           await deleteUser(firebaseUser);
+//           console.log(
+//             'Firebase user deleted successfully after backend failure.'
+//           );
+//           throw backendError; // Re-throw the original backend error
+//         }
+//       }
+
+//       if (onFormSubmit) onFormSubmit();
+//     } catch (error: any) {
+//       // Improved, unified error handling
+//       let errorMessage = 'An unexpected error occurred.';
+//       if (error.code) {
+//         // Firebase errors
+//         switch (error.code) {
+//           case 'auth/email-already-in-use':
+//             errorMessage = 'This email is already registered in Firebase.';
+//             break;
+//           case 'auth/invalid-email':
+//             errorMessage = 'The email address is invalid.';
+//             break;
+//           case 'auth/weak-password':
+//             errorMessage = 'The password is too weak.';
+//             break;
+//           default:
+//             errorMessage = `An authentication error occurred: ${error.code}`;
+//         }
+//       } else if (axios.isAxiosError(error)) {
+//         // Backend errors
+//         errorMessage =
+//           error.response?.data?.message || 'A server error occurred.';
+//       } else {
+//         // Generic JS errors
+//         errorMessage = error.message;
+//       }
+
+//       toast.error('Submission Failed', { description: errorMessage });
+//       console.error('Detailed error:', error);
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   }
+
+//   const cardClasses = isModalMode
+//     ? 'border-none shadow-none'
+//     : 'mx-auto my-8 w-full max-w-4xl shadow-lg';
+
+//   const InfoField = ({
+//     label,
+//     value
+//   }: {
+//     label: string;
+//     value: string | number | null | undefined;
+//   }) => (
+//     <div className='space-y-1'>
+//       <FormLabel>{label}</FormLabel>
+//       <p className='border-input bg-muted text-muted-foreground flex h-10 w-full items-center truncate rounded-md border px-3 py-2 text-sm'>
+//         {value || 'N/A'}
+//       </p>
+//     </div>
+//   );
+
+//   return (
+//     <Card className={cn(cardClasses)}>
+//       {!isEditMode && !isModalMode && (
+//         <CardHeader>
+//           <CardTitle className='text-2xl'>Register a New Auditor</CardTitle>
+//           <CardDescription>
+//             Create an account and professional profile for a new team member.
+//           </CardDescription>
+//         </CardHeader>
+//       )}
+//       <CardContent className={cn(isModalMode && 'p-1')}>
+//         <Form {...form}>
+//           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-12'>
+//             {!isEditMode && (
+//               <div className='space-y-6'>
+//                 <h3 className='border-b pb-2 text-xl font-semibold'>
+//                   Account Credentials
+//                 </h3>
+//                 <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+//                   <FormField
+//                     control={form.control}
+//                     name='email'
+//                     render={({ field }) => (
+//                       <FormItem>
+//                         <FormLabel>Email</FormLabel>
+//                         <FormControl>
+//                           <Input
+//                             type='email'
+//                             placeholder='auditor@example.com'
+//                             {...field}
+//                           />
+//                         </FormControl>
+//                         <FormMessage />
+//                       </FormItem>
+//                     )}
+//                   />
+//                   <div />
+//                   <FormField
+//                     control={form.control}
+//                     name='password'
+//                     render={({ field }) => (
+//                       <FormItem>
+//                         <FormLabel>Password</FormLabel>
+//                         <FormControl>
+//                           <Input
+//                             type='password'
+//                             placeholder='••••••••'
+//                             {...field}
+//                           />
+//                         </FormControl>
+//                         <FormMessage />
+//                       </FormItem>
+//                     )}
+//                   />
+//                   <FormField
+//                     control={form.control}
+//                     name='confirmPassword'
+//                     render={({ field }) => (
+//                       <FormItem>
+//                         <FormLabel>Confirm Password</FormLabel>
+//                         <FormControl>
+//                           <Input
+//                             type='password'
+//                             placeholder='••••••••'
+//                             {...field}
+//                           />
+//                         </FormControl>
+//                         <FormMessage />
+//                       </FormItem>
+//                     )}
+//                   />
+//                 </div>
+//               </div>
+//             )}
+
+//             <div className='space-y-6'>
+//               <h3 className='border-b pb-2 text-xl font-semibold'>
+//                 Professional Information
+//               </h3>
+//               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+//                 <FormField
+//                   control={form.control}
+//                   name='name'
+//                   render={({ field }) => (
+//                     <FormItem>
+//                       <FormLabel>Full Name</FormLabel>
+//                       <FormControl>
+//                         <Input placeholder='John Doe' {...field} />
+//                       </FormControl>
+//                       <FormMessage />
+//                     </FormItem>
+//                   )}
+//                 />
+//                 <FormField
+//                   control={form.control}
+//                   name='licenseNumber'
+//                   render={({ field }) => (
+//                     <FormItem>
+//                       <FormLabel>License Number</FormLabel>
+//                       <FormControl>
+//                         <Input placeholder='CISA-12345' {...field} />
+//                       </FormControl>
+//                       <FormMessage />
+//                     </FormItem>
+//                   )}
+//                 />
+//                 <FormField
+//                   control={form.control}
+//                   name='yearsExperience'
+//                   render={({ field }) => (
+//                     <FormItem>
+//                       <FormLabel>Years of Experience</FormLabel>
+//                       <FormControl>
+//                         <Input type='number' {...field} />
+//                       </FormControl>
+//                       <FormMessage />
+//                     </FormItem>
+//                   )}
+//                 />
+//                 <FormField
+//                   control={form.control}
+//                   name='role'
+//                   render={({ field }) => (
+//                     <FormItem>
+//                       <FormLabel>Role</FormLabel>
+//                       <Select
+//                         onValueChange={field.onChange}
+//                         value={field.value}
+//                       >
+//                         <FormControl>
+//                           <SelectTrigger>
+//                             <SelectValue placeholder='Select a role' />
+//                           </SelectTrigger>
+//                         </FormControl>
+//                         <SelectContent>
+//                           {Object.values(AuditorRole).map((role) => (
+//                             <SelectItem key={role} value={role}>
+//                               {role}
+//                             </SelectItem>
+//                           ))}
+//                         </SelectContent>
+//                       </Select>
+//                       <FormMessage />
+//                     </FormItem>
+//                   )}
+//                 />
+//                 <FormField
+//                   control={form.control}
+//                   name='payoutCurrency'
+//                   render={({ field }) => (
+//                     <FormItem>
+//                       <FormLabel>Payout Currency</FormLabel>
+//                       <Select
+//                         onValueChange={field.onChange}
+//                         value={field.value ?? ''}
+//                       >
+//                         <FormControl>
+//                           <SelectTrigger>
+//                             <SelectValue placeholder='Select a currency' />
+//                           </SelectTrigger>
+//                         </FormControl>
+//                         <SelectContent>
+//                           {Object.values(Currency).map((c) => (
+//                             <SelectItem key={c} value={c}>
+//                               {c}
+//                             </SelectItem>
+//                           ))}
+//                         </SelectContent>
+//                       </Select>
+//                       <FormMessage />
+//                     </FormItem>
+//                   )}
+//                 />
+//               </div>
+//             </div>
+
+//             {/* Admin Controls Section - now with Stripe Account ID */}
+//             {isEditMode && (
+//               <div className='space-y-6'>
+//                 <h3 className='border-b pb-2 text-xl font-semibold'>
+//                   Admin Controls & Status
+//                 </h3>
+//                 <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+//                   <FormField
+//                     control={form.control}
+//                     name='accountStatus'
+//                     render={({ field }) => (
+//                       <FormItem>
+//                         <FormLabel>Account Status</FormLabel>
+//                         <Select
+//                           onValueChange={field.onChange}
+//                           value={field.value}
+//                         >
+//                           <FormControl>
+//                             <SelectTrigger>
+//                               <SelectValue placeholder='Set account status' />
+//                             </SelectTrigger>
+//                           </FormControl>
+//                           <SelectContent>
+//                             {Object.values(AccountStatus).map((status) => (
+//                               <SelectItem key={status} value={status}>
+//                                 {status}
+//                               </SelectItem>
+//                             ))}
+//                           </SelectContent>
+//                         </Select>
+//                         <FormMessage />
+//                       </FormItem>
+//                     )}
+//                   />
+//                   {/* --- THIS IS THE MISSING FIELD --- */}
+//                   <FormField
+//                     control={form.control}
+//                     name='stripeAccountId'
+//                     render={({ field }) => (
+//                       <FormItem>
+//                         <FormLabel>Stripe Account ID</FormLabel>
+//                         <FormControl>
+//                           <Input
+//                             placeholder='acct_...'
+//                             {...field}
+//                             value={field.value ?? ''}
+//                           />
+//                         </FormControl>
+//                         <FormMessage />
+//                       </FormItem>
+//                     )}
+//                   />
+//                   <InfoField
+//                     label='Vetted Status'
+//                     value={auditorToEdit?.vettedStatus}
+//                   />
+//                   <InfoField
+//                     label='Joined On'
+//                     value={
+//                       auditorToEdit
+//                         ? format(new Date(auditorToEdit.createdAt), 'PPP')
+//                         : null
+//                     }
+//                   />
+//                 </div>
+//               </div>
+//             )}
+
+//             {/* Performance Metrics Section */}
+//             {isEditMode && (
+//               <div className='space-y-6'>
+//                 <h3 className='border-b pb-2 text-xl font-semibold'>
+//                   Performance Metrics (Read-Only)
+//                 </h3>
+//                 <div className='grid grid-cols-2 gap-6 md:grid-cols-4'>
+//                   <InfoField
+//                     label='Rating'
+//                     value={auditorToEdit?.rating.toFixed(1)}
+//                   />
+//                   <InfoField
+//                     label='Reviews'
+//                     value={auditorToEdit?.reviewsCount}
+//                   />
+//                   <InfoField
+//                     label='Successful Audits'
+//                     value={auditorToEdit?.successCount}
+//                   />
+//                   <InfoField
+//                     label='Avg. Response (hrs)'
+//                     value={auditorToEdit?.avgResponseTime}
+//                   />
+//                 </div>
+//               </div>
+//             )}
+
+//             {/* Skills & Portfolio Section */}
+//             <div className='space-y-6'>
+//               <h3 className='border-b pb-2 text-xl font-semibold'>
+//                 Skills & Portfolio
+//               </h3>
+//               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+//                 <FormField
+//                   control={form.control}
+//                   name='specialties'
+//                   render={({ field }) => (
+//                     <FormItem>
+//                       <FormLabel>Specialties</FormLabel>
+//                       <FormControl>
+//                         <MultiSelectCreatable
+//                           options={PREDEFINED_SPECIALTIES}
+//                           value={field.value ?? []}
+//                           onChange={field.onChange}
+//                           placeholder='Select or create...'
+//                         />
+//                       </FormControl>
+//                       <FormMessage />
+//                     </FormItem>
+//                   )}
+//                 />
+//                 <FormField
+//                   control={form.control}
+//                   name='languages'
+//                   render={({ field }) => (
+//                     <FormItem>
+//                       <FormLabel>Languages</FormLabel>
+//                       <FormControl>
+//                         <MultiSelectCreatable
+//                           options={PREDEFINED_LANGUAGES}
+//                           value={field.value ?? []}
+//                           onChange={field.onChange}
+//                           placeholder='Select or create...'
+//                         />
+//                       </FormControl>
+//                       <FormMessage />
+//                     </FormItem>
+//                   )}
+//                 />
+//               </div>
+//               <div className='pt-4'>
+//                 <FormLabel>Portfolio Links</FormLabel>
+//                 <div className='mt-2 space-y-2'>
+//                   {portfolioFields.map((item, index) => (
+//                     <FormField
+//                       key={item.id}
+//                       control={form.control}
+//                       name={`portfolioLinks.${index}.value`}
+//                       render={({ field }) => (
+//                         <FormItem>
+//                           <FormControl>
+//                             <div className='flex items-center gap-2'>
+//                               <Input
+//                                 {...field}
+//                                 placeholder='https://github.com/johndoe/audits'
+//                               />
+//                               <Button
+//                                 type='button'
+//                                 variant='ghost'
+//                                 size='icon'
+//                                 onClick={() => removePortfolioLink(index)}
+//                               >
+//                                 <Trash2 className='text-destructive h-4 w-4' />
+//                               </Button>
+//                             </div>
+//                           </FormControl>
+//                           <FormMessage />
+//                         </FormItem>
+//                       )}
+//                     />
+//                   ))}
+//                 </div>
+//                 <Button
+//                   type='button'
+//                   variant='outline'
+//                   size='sm'
+//                   className='mt-2'
+//                   onClick={() => appendPortfolioLink({ value: '' })}
+//                 >
+//                   <PlusCircle className='mr-2 h-4 w-4' />
+//                   Add Link
+//                 </Button>
+//               </div>
+//             </div>
+
+//             <Button
+//               type='submit'
+//               className='w-full md:w-auto'
+//               disabled={isSubmitting}
+//             >
+//               {isSubmitting && (
+//                 <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+//               )}
+//               {isEditMode ? 'Save Changes' : 'Register Auditor'}
+//             </Button>
+//           </form>
+//         </Form>
+//       </CardContent>
+//     </Card>
+//   );
+// }
+
+// ############################################################################################################
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import * as z from 'zod';
-
-import axios from 'axios';
 import {
-  SoloAuditorRegistrationSchema,
+  AuditorFormSchema,
   AuditorRole,
   Currency,
   AccountStatus
 } from '@/lib/validators/auditor-schema';
+import { AuditorProfile } from '@/stores/useProfileStore';
 
-import { MultiSelectCreatable } from '@/components/ui/multi-select-creatable';
+import { toast } from 'sonner';
+import axios from 'axios';
+import {
+  createAuditor,
+  updateAuditor,
+  UpdateAuditorPayload,
+  CreateAuditorPayload
+} from '@/lib/services/auditorService';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,275 +681,285 @@ import {
 import { Input } from '@/components/ui/input';
 import {
   Select,
-  SelectContent,
-  SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
+  SelectContent,
+  SelectItem
 } from '@/components/ui/select';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { X, Loader2, PlusCircle, Trash2, FileUp, FileText } from 'lucide-react';
-import { useState, ChangeEvent } from 'react';
-import { toast } from 'sonner';
+import { MultiSelectCreatable } from '@/components/ui/multi-select-creatable';
+import { Loader2, PlusCircle, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
-type FormValues = z.infer<typeof SoloAuditorRegistrationSchema>;
+import { auth } from '@/lib/firebase';
+import {
+  createUserWithEmailAndPassword,
+  deleteUser,
+  signInWithEmailAndPassword,
+  signOut,
+  updateProfile
+} from 'firebase/auth';
+import { createBackendUser } from '@/lib/services/userService';
+
+type FormValues = z.infer<typeof AuditorFormSchema>;
+
+interface AuditorRegistrationFormProps {
+  auditorToEdit?: AuditorProfile | null;
+  onFormSubmit?: () => void;
+  isModalMode?: boolean;
+}
 
 const PREDEFINED_SPECIALTIES = [
   'IFRS',
   'Tax Compliance',
-  'Forensic Accounting',
-  'Smart Contract Audit',
-  'DeFi Protocols',
-  'NFT Security',
-  'L2 Scaling Solutions'
+  'Smart Contract Audit'
 ];
-const PREDEFINED_LANGUAGES = [
-  'English',
-  'Arabic',
-  'German',
-  'Spanish',
-  'Japanese',
-  'Mandarin',
-  'French'
-];
-
-const defaultValues: Partial<FormValues> = {
-  name: '',
-  licenseNumber: '',
-  role: undefined,
-  yearsExperience: 0,
-  payoutCurrency: null,
-  specialties: [],
-  languages: [],
-  portfolioLinks: [],
-  email: '',
-  password: '',
-  confirmPassword: ''
-};
-
-interface AuditorRegistrationFormProps {
-  onFormSubmit?: () => void;
-}
+const PREDEFINED_LANGUAGES = ['English', 'Arabic', 'German', 'Spanish'];
 
 export function AuditorRegistrationForm({
-  onFormSubmit
+  auditorToEdit,
+  onFormSubmit,
+  isModalMode = false
 }: AuditorRegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  const isEditMode = !!auditorToEdit;
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(SoloAuditorRegistrationSchema),
-    defaultValues,
+    resolver: zodResolver(AuditorFormSchema),
+    defaultValues: {
+      name: '',
+      licenseNumber: '',
+      role: undefined,
+      yearsExperience: 0,
+      payoutCurrency: null,
+      accountStatus: AccountStatus.PENDING,
+      stripeAccountId: '',
+      specialties: [],
+      languages: [],
+      portfolioLinks: [],
+      email: '',
+      password: '',
+      confirmPassword: ''
+    },
     mode: 'onChange'
   });
 
+  useEffect(() => {
+    if (isEditMode && auditorToEdit) {
+      form.reset({
+        name: auditorToEdit.name,
+        licenseNumber: auditorToEdit.licenseNumber,
+        role: auditorToEdit.role,
+        yearsExperience: auditorToEdit.yearsExperience,
+        payoutCurrency: auditorToEdit.payoutCurrency,
+        accountStatus: auditorToEdit.accountStatus,
+        stripeAccountId: auditorToEdit.stripeAccountId || '',
+        specialties: auditorToEdit.specialties,
+        languages: auditorToEdit.languages,
+        portfolioLinks:
+          auditorToEdit.portfolioLinks?.map((link) => ({ value: link })) || []
+      });
+    }
+  }, [auditorToEdit, isEditMode, form.reset]);
+
   const {
     fields: portfolioFields,
-    append: appendPortfolio,
-    remove: removePortfolio
+    append: appendPortfolioLink,
+    remove: removePortfolioLink
   } = useFieldArray({
     name: 'portfolioLinks',
     control: form.control
   });
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      setSelectedFiles((prevFiles) => [...prevFiles, ...Array.from(files)]);
-    }
-  };
-
-  const removeFile = (fileToRemove: File) => {
-    setSelectedFiles((prevFiles) =>
-      prevFiles.filter((file) => file !== fileToRemove)
-    );
-  };
-
   async function onSubmit(data: FormValues) {
     setIsSubmitting(true);
 
-    const uploadFiles = async (files: File[]): Promise<string[]> => {
-      if (files.length === 0) return [];
-      const uploadPromises = files.map(
-        (file) =>
-          new Promise<string>((resolve) =>
-            setTimeout(
-              () => resolve(`https://fake-storage.com/docs/${file.name}`),
-              500
-            )
-          )
-      );
-      toast.promise(Promise.all(uploadPromises), {
-        loading: `Uploading ${files.length} file(s)...`,
-        success: 'Files uploaded successfully!',
-        error: 'File upload failed.'
-      });
-      return await Promise.all(uploadPromises);
-    };
-
     try {
-      const supportingDocUrls = await uploadFiles(selectedFiles);
-
-      const requestBody = {
-        auth: {
-          firebaseId: 'firebase-uid-placeholder',
-          email: data.email
-        },
-        auditor: {
+      if (isEditMode && auditorToEdit) {
+        const payload: UpdateAuditorPayload = {
           name: data.name,
           licenseNumber: data.licenseNumber,
-          role: data.role,
           yearsExperience: data.yearsExperience,
-          specialties: data.specialties || [],
-          languages: data.languages || [],
-          payoutCurrency: data.payoutCurrency || undefined,
-          portfolioLinks: data.portfolioLinks?.map((link) => link.value) || [],
-          supportingDocs: supportingDocUrls,
-          // Add the required accountStatus field
-          accountStatus: AccountStatus.PENDING
+          role: data.role,
+          accountStatus: data.accountStatus,
+          stripeAccountId: data.stripeAccountId,
+          specialties: data.specialties,
+          languages: data.languages,
+          payoutCurrency: data.payoutCurrency,
+          portfolioLinks: data.portfolioLinks
+            ?.map((link) => link.value)
+            .filter(Boolean)
+        };
+        await updateAuditor(auditorToEdit.id, payload);
+        toast.success('Profile updated successfully!');
+      } else {
+        if (data.password !== data.confirmPassword) {
+          toast.error('Passwords do not match');
+          return;
+        } else if (!data.email || !data.password || !data.role) {
+          throw new Error(
+            'Email, password, and role are required to create a new auditor.'
+          );
         }
-      };
 
-      console.log('Submitting to API:', JSON.stringify(requestBody, null, 2));
-      const SERVER_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-      if (!SERVER_URL) {
-        throw new Error('Server URL is not configured.');
-      }
+        // Step 1: Create the user in Firebase Auth.
+        // const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+        // const firebaseUser = userCredential.user;
+        // await updateProfile(firebaseUser, { displayName: data.name });
+        // console.log("Step 1/2: Firebase user created successfully:", firebaseUser.uid)
 
-      // The endpoint
-      const apiEndpoint = `${SERVER_URL}/api/v1/auditors`;
-      const response = await axios.post(apiEndpoint, requestBody);
+        // Step 2: Create backend user record
 
-      toast.success('Registration Successful! 🚀', {
-        description: "Your profile is under review. We'll be in touch!"
-      });
-      toast.success('Registration Successful! 🚀', {
-        description: 'The new auditor has been added to the team.'
-      });
-      form.reset();
-      setSelectedFiles([]);
-
-      if (onFormSubmit) {
-        onFormSubmit();
-      }
-    } catch (error) {
-      console.error('Registration failed:', error);
-      let errorMessage = 'An unexpected error occurred.';
-      if (axios.isAxiosError(error) && error.response) {
-        console.error('Full Backend Error Response:', error.response.data);
-        const responseData = error.response.data;
-        if (responseData && responseData.errors) {
-          const zodErrors = responseData.errors;
-          const findFirstError = (errs: any): string | null => {
-            if (!errs) return null;
-            if (errs._errors && errs._errors.length > 0) return errs._errors[0];
-            for (const key in errs) {
-              if (key !== '_errors') {
-                const nestedError = findFirstError(errs[key]);
-                if (nestedError) return `${key}: ${nestedError}`;
-              }
+        try {
+          const payload: CreateAuditorPayload = {
+            auth: {
+              name: data.name,
+              email: data.email,
+              password: data.password
+            },
+            auditor: {
+              name: data.name,
+              licenseNumber: data.licenseNumber,
+              role: data.role,
+              yearsExperience: data.yearsExperience,
+              accountStatus: AccountStatus.PENDING,
+              payoutCurrency: data.payoutCurrency,
+              specialties: data.specialties,
+              languages: data.languages,
+              portfolioLinks: data.portfolioLinks
+                ?.map((link) => link.value)
+                .filter(Boolean),
+              stripeAccountId: data.stripeAccountId
             }
-            return null;
           };
-          errorMessage =
-            findFirstError(zodErrors) ||
-            responseData.message ||
-            'Validation failed.';
-        } else {
-          errorMessage = responseData.message || 'Server error.';
+          console.log(payload);
+          await createAuditor(payload);
+          toast.success('Auditor account and profile created successfully!');
+        } catch (error) {
+          console.error('Backend auditor creation failed');
+          throw error;
         }
-      } else if (error instanceof Error) {
+      }
+
+      if (onFormSubmit) onFormSubmit();
+    } catch (error: any) {
+      let errorMessage = 'An unexpected error occurred.';
+
+      // Axios errors
+      if (axios.isAxiosError(error)) {
+        errorMessage =
+          error.response?.data?.message || 'Backend request failed.';
+      }
+      // Generic errors
+      else {
         errorMessage = error.message;
       }
-      toast.error('Registration Failed', { description: errorMessage });
+
+      toast.error('Submission Failed', { description: errorMessage });
+      console.error('Detailed error:', error);
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  const cardClasses = isModalMode
+    ? 'border-none shadow-none'
+    : 'mx-auto my-8 w-full max-w-4xl shadow-lg';
+
+  const InfoField = ({
+    label,
+    value
+  }: {
+    label: string;
+    value: string | number | null | undefined;
+  }) => (
+    <div className='space-y-1'>
+      <FormLabel>{label}</FormLabel>
+      <p className='border-input bg-muted text-muted-foreground flex h-10 w-full items-center truncate rounded-md border px-3 py-2 text-sm'>
+        {value || 'N/A'}
+      </p>
+    </div>
+  );
+
   return (
-    <Card className='mx-auto my-8 w-full max-w-4xl shadow-lg'>
-      <CardHeader>
-        <CardTitle className='text-3xl font-bold tracking-tight'>
-          Auditor Registration
-        </CardTitle>
-        <CardDescription>
-          Join our platform by creating your account and professional profile.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Card className={cn(cardClasses)}>
+      {!isEditMode && !isModalMode && (
+        <CardHeader>
+          <CardTitle className='text-2xl'>Register a New Auditor</CardTitle>
+          <CardDescription>
+            Create an account and professional profile for a new team member.
+          </CardDescription>
+        </CardHeader>
+      )}
+      <CardContent className={cn(isModalMode && 'p-1')}>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-12'>
-            {/* Section 1: Account Information */}
-            <div className='space-y-6'>
-              <h3 className='border-b pb-2 text-xl font-semibold tracking-tight'>
-                Account Information
-              </h3>
-              <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-                <FormField
-                  control={form.control}
-                  name='email'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Login Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='email'
-                          placeholder='you@example.com'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div />
-                <FormField
-                  control={form.control}
-                  name='password'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='password'
-                          placeholder='••••••••'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='confirmPassword'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='password'
-                          placeholder='••••••••'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            {!isEditMode && (
+              <div className='space-y-6'>
+                <h3 className='border-b pb-2 text-xl font-semibold'>
+                  Account Credentials
+                </h3>
+                <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                  <FormField
+                    control={form.control}
+                    name='email'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type='email'
+                            placeholder='auditor@example.com'
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div />
+                  <FormField
+                    control={form.control}
+                    name='password'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type='password'
+                            placeholder='••••••••'
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name='confirmPassword'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type='password'
+                            placeholder='••••••••'
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Section 2: Professional Information */}
             <div className='space-y-6'>
-              <h3 className='border-b pb-2 text-xl font-semibold tracking-tight'>
+              <h3 className='border-b pb-2 text-xl font-semibold'>
                 Professional Information
               </h3>
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
@@ -318,37 +983,8 @@ export function AuditorRegistrationForm({
                     <FormItem>
                       <FormLabel>License Number</FormLabel>
                       <FormControl>
-                        <Input placeholder='e.g., CISA-123456' {...field} />
+                        <Input placeholder='CISA-12345' {...field} />
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='role'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Current Role</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder='Select your role' />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {Object.values(AuditorRole)
-                            .filter((role) => role !== 'SUPERADMIN')
-                            .map((role) => (
-                              <SelectItem key={role} value={role}>
-                                {role}
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -360,8 +996,35 @@ export function AuditorRegistrationForm({
                     <FormItem>
                       <FormLabel>Years of Experience</FormLabel>
                       <FormControl>
-                        <Input type='number' placeholder='5' {...field} />
+                        <Input type='number' {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='role'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select a role' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(AuditorRole).map((role) => (
+                            <SelectItem key={role} value={role}>
+                              {role}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -389,9 +1052,6 @@ export function AuditorRegistrationForm({
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormDescription>
-                        This is the currency you'll receive payments in.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -399,10 +1059,105 @@ export function AuditorRegistrationForm({
               </div>
             </div>
 
-            {/* Section 3: Skills & Expertise */}
+            {/* Admin Controls Section - now with Stripe Account ID */}
+            {isEditMode && (
+              <div className='space-y-6'>
+                <h3 className='border-b pb-2 text-xl font-semibold'>
+                  Admin Controls & Status
+                </h3>
+                <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                  <FormField
+                    control={form.control}
+                    name='accountStatus'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Account Status</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Set account status' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.values(AccountStatus).map((status) => (
+                              <SelectItem key={status} value={status}>
+                                {status}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* --- THIS IS THE MISSING FIELD --- */}
+                  <FormField
+                    control={form.control}
+                    name='stripeAccountId'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Stripe Account ID</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder='acct_...'
+                            {...field}
+                            value={field.value ?? ''}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <InfoField
+                    label='Vetted Status'
+                    value={auditorToEdit?.vettedStatus}
+                  />
+                  <InfoField
+                    label='Joined On'
+                    value={
+                      auditorToEdit
+                        ? format(new Date(auditorToEdit.createdAt), 'PPP')
+                        : null
+                    }
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Performance Metrics Section */}
+            {isEditMode && (
+              <div className='space-y-6'>
+                <h3 className='border-b pb-2 text-xl font-semibold'>
+                  Performance Metrics (Read-Only)
+                </h3>
+                <div className='grid grid-cols-2 gap-6 md:grid-cols-4'>
+                  <InfoField
+                    label='Rating'
+                    value={auditorToEdit?.rating.toFixed(1)}
+                  />
+                  <InfoField
+                    label='Reviews'
+                    value={auditorToEdit?.reviewsCount}
+                  />
+                  <InfoField
+                    label='Successful Audits'
+                    value={auditorToEdit?.successCount}
+                  />
+                  <InfoField
+                    label='Avg. Response (hrs)'
+                    value={auditorToEdit?.avgResponseTime}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Skills & Portfolio Section */}
             <div className='space-y-6'>
-              <h3 className='border-b pb-2 text-xl font-semibold tracking-tight'>
-                Skills & Expertise
+              <h3 className='border-b pb-2 text-xl font-semibold'>
+                Skills & Portfolio
               </h3>
               <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                 <FormField
@@ -416,7 +1171,7 @@ export function AuditorRegistrationForm({
                           options={PREDEFINED_SPECIALTIES}
                           value={field.value ?? []}
                           onChange={field.onChange}
-                          placeholder='Select or create specialties...'
+                          placeholder='Select or create...'
                         />
                       </FormControl>
                       <FormMessage />
@@ -428,13 +1183,13 @@ export function AuditorRegistrationForm({
                   name='languages'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Languages Spoken</FormLabel>
+                      <FormLabel>Languages</FormLabel>
                       <FormControl>
                         <MultiSelectCreatable
                           options={PREDEFINED_LANGUAGES}
                           value={field.value ?? []}
                           onChange={field.onChange}
-                          placeholder='Select or create languages...'
+                          placeholder='Select or create...'
                         />
                       </FormControl>
                       <FormMessage />
@@ -442,122 +1197,48 @@ export function AuditorRegistrationForm({
                   )}
                 />
               </div>
-            </div>
-
-            {/* Section 4: Portfolio & Documents */}
-            <div className='space-y-6'>
-              <h3 className='border-b pb-2 text-xl font-semibold tracking-tight'>
-                Portfolio & Documents
-              </h3>
-              <div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
-                <div>
-                  <FormLabel>Portfolio Links</FormLabel>
-                  <FormDescription className='text-xs'>
-                    Links to public audit reports or your GitHub profile.
-                  </FormDescription>
-                  <div className='mt-2 space-y-2'>
-                    {portfolioFields.map((field, index) => (
-                      <FormField
-                        control={form.control}
-                        key={field.id}
-                        name={`portfolioLinks.${index}.value`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <div className='flex items-center gap-2'>
-                                <Input
-                                  {...field}
-                                  placeholder='https://github.com/johndoe/audits'
-                                />
-                                <Button
-                                  type='button'
-                                  variant='ghost'
-                                  size='icon'
-                                  onClick={() => removePortfolio(index)}
-                                >
-                                  <Trash2 className='text-destructive h-4 w-4' />
-                                </Button>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    ))}
-                  </div>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    size='sm'
-                    className='mt-2'
-                    onClick={() => appendPortfolio({ value: '' })}
-                  >
-                    <PlusCircle className='mr-2 h-4 w-4' />
-                    Add Link
-                  </Button>
-                </div>
-                <div className='space-y-2'>
-                  <FormLabel>Supporting Documents</FormLabel>
-                  <FormDescription className='text-xs'>
-                    Upload your license, certifications, or CV (PDF only).
-                  </FormDescription>
-                  <div className='relative'>
-                    <label
-                      htmlFor='file-upload'
-                      className='text-primary hover:text-primary-focus relative cursor-pointer rounded-md font-medium'
-                    >
-                      <div className='border-muted hover:border-primary flex items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors'>
-                        <div className='text-center'>
-                          <FileUp className='text-muted-foreground mx-auto h-12 w-12' />
-                          <p className='text-muted-foreground mt-2 text-sm'>
-                            <span className='text-primary font-semibold'>
-                              Click to upload
-                            </span>{' '}
-                            or drag and drop
-                          </p>
-                        </div>
-                      </div>
-                    </label>
-                    <Input
-                      id='file-upload'
-                      type='file'
-                      className='sr-only'
-                      multiple
-                      accept='.pdf'
-                      onChange={handleFileChange}
-                    />
-                  </div>
-                  {selectedFiles.length > 0 && (
-                    <div className='space-y-2 pt-2'>
-                      <h4 className='text-sm font-medium'>Selected files:</h4>
-                      <div className='space-y-2 rounded-md border p-2'>
-                        {selectedFiles.map((file, index) => (
-                          <div
-                            key={index}
-                            className='flex items-center justify-between text-sm'
-                          >
-                            <div className='flex items-center gap-2 truncate'>
-                              <FileText className='h-4 w-4 flex-shrink-0' />
-                              <span className='truncate'>{file.name}</span>
-                              <span className='text-muted-foreground text-xs'>
-                                ({(file.size / 1024).toFixed(1)} KB)
-                              </span>
+              <div className='pt-4'>
+                <FormLabel>Portfolio Links</FormLabel>
+                <div className='mt-2 space-y-2'>
+                  {portfolioFields.map((item, index) => (
+                    <FormField
+                      key={item.id}
+                      control={form.control}
+                      name={`portfolioLinks.${index}.value`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className='flex items-center gap-2'>
+                              <Input
+                                {...field}
+                                placeholder='https://github.com/johndoe/audits'
+                              />
+                              <Button
+                                type='button'
+                                variant='ghost'
+                                size='icon'
+                                onClick={() => removePortfolioLink(index)}
+                              >
+                                <Trash2 className='text-destructive h-4 w-4' />
+                              </Button>
                             </div>
-                            <Button
-                              type='button'
-                              variant='ghost'
-                              size='icon'
-                              className='h-6 w-6'
-                              onClick={() => removeFile(file)}
-                            >
-                              <X className='text-destructive h-4 w-4' />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
                 </div>
+                <Button
+                  type='button'
+                  variant='outline'
+                  size='sm'
+                  className='mt-2'
+                  onClick={() => appendPortfolioLink({ value: '' })}
+                >
+                  <PlusCircle className='mr-2 h-4 w-4' />
+                  Add Link
+                </Button>
               </div>
             </div>
 
@@ -566,14 +1247,10 @@ export function AuditorRegistrationForm({
               className='w-full md:w-auto'
               disabled={isSubmitting}
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                  Submitting...
-                </>
-              ) : (
-                'Submit Registration'
+              {isSubmitting && (
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
               )}
+              {isEditMode ? 'Save Changes' : 'Register Auditor'}
             </Button>
           </form>
         </Form>

@@ -1,11 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import RequestsGrid from './RequestsGrid';
 import { useEngagementRequests } from '../hooks/useEngagementRequests';
 import PreviewModal from './PreviewModal';
 import ProposalModal from './ProposalModal';
 import SearchAndFilter from './SearchAndFilter';
+import { ClientRequest, getClientRequests } from '@/lib/services/clientRequestService';
+import { useAuth } from '@/components/layout/providers';
+import { toast } from 'sonner';
 
 const EngagementRequestsPage: React.FC = () => {
   const {
@@ -30,6 +33,44 @@ const EngagementRequestsPage: React.FC = () => {
     isProposalSubmitted,
     mockRequests
   } = useEngagementRequests();
+
+
+  const { user, loading: authLoading } = useAuth();
+  
+    const [clientRequests, setClientRequests] = useState<ClientRequest[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+
+
+  useEffect(() => {
+      const fetchClientRequests = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const data = await getClientRequests();
+          if (data) {
+            setClientRequests(data);
+          } else {
+            setError('Failed to fetch proposals.');
+            toast.error('Could not load proposals.');
+          }
+        } catch (err) {
+          setError('An error occurred while fetching data.');
+          toast.error('Failed to load proposals.');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+  
+      if (!authLoading && user) {
+        fetchClientRequests();
+      } else if (!authLoading && !user) {
+        setIsLoading(false);
+        setError('You must be logged in to view proposals.');
+      }
+    }, [user, authLoading]);
+
 
   return (
     <div className='flex w-full flex-col'>
@@ -75,6 +116,7 @@ const EngagementRequestsPage: React.FC = () => {
 
         {/* Requests Grid */}
         <RequestsGrid
+          clientRequests={clientRequests}
           requests={filteredRequests}
           bookmarkedRequests={bookmarkedRequests}
           onToggleBookmark={toggleBookmark}
