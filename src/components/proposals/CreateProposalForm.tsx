@@ -146,7 +146,7 @@ export function CreateProposalForm({
       toast.success('Proposal Submitted Successfully! 🚀');
 
       setTimeout(() => {
-        router.push('/dashboard/proposals');
+        router.push('/dashboard/my-proposals');
       }, 1500);
     } catch (error) {
       console.error('Proposal submission failed:', error);

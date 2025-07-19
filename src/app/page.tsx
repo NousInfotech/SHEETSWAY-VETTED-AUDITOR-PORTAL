@@ -5,17 +5,23 @@ import { useAuth } from '@/components/layout/providers';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useProfileStore } from '@/stores/useProfileStore';
 
 export default function Page() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const profile = useProfileStore.getState().profile;
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
         router.push('/auth/sign-in');
       } else {
-        router.push('/auth/audit-firm');
+        if (!profile) {
+          router.push('/auth/audit-firm');
+        } else {
+          router.push('/dashboard/overview');
+        }
       }
     }
   }, [user, loading, router]);

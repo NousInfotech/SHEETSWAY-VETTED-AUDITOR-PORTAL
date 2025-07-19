@@ -275,9 +275,12 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
 
 
 
+      <div className='text-center font-bold text-red-600 text-3xl'>
+        <h1 >Client Requests Starts from Here</h1>
+            <p >you can submit proposal only for client requests below</p>
+      </div>
 
-
-      {/* original */}
+      {/* Client Requests */}
 
       {clientRequests.map((request: any) => {
         const isBookmarked = bookmarkedRequests.includes(request.id);
@@ -288,6 +291,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
             key={request.id}
             className='bg-card text-card-foreground rounded-xl border shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg'
           >
+            
             <div className='p-5 sm:p-6'>
               {/* --- Card Header --- */}
               <div className='mb-4 flex items-start justify-between'>
