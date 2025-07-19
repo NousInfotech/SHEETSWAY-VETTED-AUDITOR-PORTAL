@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+
 // Ensure your enums are exported if they are in this file
 export enum Currency {
   EUR = "EUR",

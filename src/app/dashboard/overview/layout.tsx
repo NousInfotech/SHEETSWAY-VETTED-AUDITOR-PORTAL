@@ -223,6 +223,7 @@ import {
   CardAction,
   CardFooter
 } from '@/components/ui/card';
+import { useProfileStore } from '@/stores/useProfileStore';
 import {
   IconBriefcase,
   IconClipboardList,
@@ -245,9 +246,10 @@ export default function DashboardComponent({
   area_stats: React.ReactNode;
 }) {
   const { user } = useAuth();
+  const profile = useProfileStore.getState().profile;
 
-  console.log(user)
-
+  
+  console.log(profile)
   return (
     <PageContainer>
       <div className='flex flex-1 flex-col space-y-4 pb-10'>

@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { format as formatDateFns } from 'date-fns';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -23,4 +24,38 @@ export function formatBytes(
       ? (accurateSizes[i] ?? 'Bytest')
       : (sizes[i] ?? 'Bytes')
   }`;
+}
+
+
+
+
+
+
+
+
+
+
+export function formatDate(dateString: string | Date | null | undefined): string {
+  if (!dateString) return 'N/A';
+  try {
+    // 'PPP' is a nice, long-form date format like "Jul 20th, 2025"
+    return formatDateFns(new Date(dateString), 'PPP');
+  } catch (error) {
+    console.error("Invalid date provided to formatDate:", dateString, error);
+    return 'Invalid Date';
+  }
+}
+
+
+export function formatCurrency(amount: number | null | undefined, currency: string = 'USD'): string {
+  if (amount === null || amount === undefined || isNaN(amount)) {
+    return 'Not specified';
+  }
+  
+  // This uses the browser's built-in Intl API for robust currency formatting.
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+  }).format(amount);
 }

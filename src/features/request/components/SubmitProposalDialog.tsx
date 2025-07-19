@@ -40,9 +40,9 @@ function SubmitProposalDialog({
           {/* 2. This div is now the main content area that will scroll */}
           <div className='flex-grow overflow-y-auto pr-2'>
             <CreateProposalForm
-              clientRequestId={request.id}
-              auditorId=''
-              auditFirmId=''
+              clientRequestId={request?.id}
+              
+              
             />
           </div>
         </DialogContent>

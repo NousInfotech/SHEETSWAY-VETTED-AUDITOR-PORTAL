@@ -22,6 +22,7 @@ import {
 import { ClientRequest } from '@/lib/services/clientRequestService';
 import { ClientRequestDetailDialog } from './ClientRequestDetailDialog';
 import SubmitProposalDialog from './SubmitProposalDialog';
+import { useProfileStore } from '@/stores/useProfileStore';
 
 
 
@@ -50,10 +51,12 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
     useState<ClientRequest | null>(null);
 
     const [isopen, setIsopen] = useState(false)
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false)
     const [isSubmitModelOpen, setIsSubmitModelOpen] = useState(false)
+    const profile = useProfileStore.getState().profile;
 
   const onClose = () => {
-    setSelectedClientRequest(null);
+    setIsPreviewOpen(false)
   };
   const onCloseSubmitModel = () => {
     setIsSubmitModelOpen(false)
@@ -414,7 +417,10 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                 {/* Action Buttons */}
                 <div className='flex w-full items-center gap-3 sm:w-auto'>
                   <button
-                    onClick={() => setSelectedClientRequest(request)}
+                    onClick={() => {
+                      setSelectedClientRequest(request)
+                      setIsPreviewOpen(true)
+                    }}
                     className='border-border hover:bg-muted bg-card text-foreground flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors sm:flex-none'
                   >
                     <Eye size={16} />
@@ -449,7 +455,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
       
         <ClientRequestDetailDialog
           request={selectedClientRequest}
-          isOpen={!!selectedClientRequest}
+          isOpen={!!isPreviewOpen}
           onClose={onClose}
           handleSubmitProposal={handleSubmitProposal}
          />
