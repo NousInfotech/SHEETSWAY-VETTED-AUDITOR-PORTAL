@@ -9,6 +9,7 @@ import BankingDataTab from './components/BankingDataTab';
 import PaymentsContractsTab from './components/PaymentsContractsTab';
 import ReviewsHistoryTab from './components/ReviewsHistoryTab';
 import EngagementSettingsTab from './components/EngagementSettingsTab';
+import DocumentsTab from './components/DocumentsTab';
 
 const EngagementViewPage = () => {
   // Remove local isDark and theme logic
@@ -138,6 +139,7 @@ const EngagementViewPage = () => {
             {currentWorkspaceTab === 'banking' && <BankingDataTab data={bankingData} />}
             {currentWorkspaceTab === 'payments' && <PaymentsContractsTab payments={payments} contracts={contracts} />}
             {currentWorkspaceTab === 'reviews' && <ReviewsHistoryTab reviews={reviews} engagementId={selectedEngagement.id} />}
+            {currentWorkspaceTab === 'documents' && <DocumentsTab />}
             {currentWorkspaceTab === 'settings' && <EngagementSettingsTab engagement={selectedEngagement} onUpdate={updateEngagement} />}
           </EngagementWorkspace>
         ) : null;

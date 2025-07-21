@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Review } from '../types/engagement-types';
-import { Star, CheckCircle, Download } from 'lucide-react';
+import { Star, CheckCircle, Download, Edit2 } from 'lucide-react';
 
 interface ReviewsHistoryTabProps {
   reviews: Review[];
@@ -8,6 +8,22 @@ interface ReviewsHistoryTabProps {
 }
 
 const ReviewsHistoryTab: React.FC<ReviewsHistoryTabProps> = ({ reviews, engagementId }) => {
+  // Mock milestones for demonstration
+  const [milestones, setMilestones] = useState([
+    { id: 1, title: 'Kickoff Meeting', completed: false, note: '' },
+    { id: 2, title: 'Document Collection', completed: false, note: '' },
+    { id: 3, title: 'Fieldwork', completed: false, note: '' },
+    { id: 4, title: 'Draft Report', completed: false, note: '' },
+    { id: 5, title: 'Final Report', completed: false, note: '' },
+  ]);
+
+  const handleToggleComplete = (id: number) => {
+    setMilestones(prev => prev.map(m => m.id === id ? { ...m, completed: !m.completed } : m));
+  };
+  const handleNoteChange = (id: number, value: string) => {
+    setMilestones(prev => prev.map(m => m.id === id ? { ...m, note: value } : m));
+  };
+
   const engagementReviews = reviews.filter(r => r.engagementId === engagementId);
   const [engagement, setEngagement] = useState<any>(null);
   const [payments, setPayments] = useState<any[]>([]);
@@ -54,57 +70,44 @@ const ReviewsHistoryTab: React.FC<ReviewsHistoryTabProps> = ({ reviews, engageme
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-semibold text-foreground mb-4">Client Reviews</h2>
-        {engagementReviews.length === 0 ? (
-          <div className="text-gray-600 dark:text-gray-300">No reviews for this engagement yet.</div>
-        ) : (
-          <div className="space-y-4">
-            {engagementReviews.map(review => (
-              <div key={review.id} className="bg-card dark:bg-card border border-border rounded-lg p-6 transition-colors">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-semibold text-gray-900 dark:text-white">
-                    {review.clientName}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 text-yellow-400" />
-                    <span className="font-bold">{review.rating}/5</span>
-                  </div>
-                </div>
-                <div className="text-gray-700 dark:text-gray-200 mb-2">
-                  {review.comment}
-                </div>
-                <div className="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
-                  <span>Communication: {review.aspects.communication}/5</span>
-                  <span>Expertise: {review.aspects.expertise}/5</span>
-                  <span>Timeliness: {review.aspects.timeliness}/5</span>
-                  <span>Overall: {review.aspects.overall}/5</span>
-                </div>
-                <div className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                  {new Date(review.date).toLocaleDateString()}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <div>
-        <h2 className="text-xl font-semibold text-foreground mb-4">Engagement Timeline</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-4">Milestones</h2>
         <div className="bg-card dark:bg-card border border-border rounded-lg p-6 transition-colors">
-          {statusHistory.length === 0 ? (
-            <div className="text-gray-600 dark:text-gray-300">No timeline data available.</div>
-          ) : (
-            <ol className="relative border-l border-blue-400 ml-4">
-              {statusHistory.map((event, idx) => (
-                <li key={idx} className="mb-6 ml-6">
-                  <span className="absolute -left-3 flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full ring-8 ring-white dark:ring-gray-900 dark:bg-blue-900">
-                    <CheckCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  </span>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{event.status}</h3>
-                  <time className="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">{new Date(event.date).toLocaleDateString()}</time>
-                </li>
+          <table className="w-full">
+            <thead>
+              <tr>
+                <th className="text-left px-4 py-2">Milestone</th>
+                <th className="text-center px-4 py-2">Completed</th>
+                <th className="text-left px-4 py-2">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {milestones.map(milestone => (
+                <tr key={milestone.id}>
+                  <td className="px-4 py-2">{milestone.title}</td>
+                  <td className="text-center px-4 py-2">
+                    <input
+                      type="checkbox"
+                      checked={milestone.completed}
+                      onChange={() => handleToggleComplete(milestone.id)}
+                      className="form-checkbox h-5 w-5 text-blue-600"
+                    />
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={milestone.note}
+                        onChange={e => handleNoteChange(milestone.id, e.target.value)}
+                        className="w-full px-2 py-1 border border-border rounded-lg bg-background text-foreground"
+                        placeholder="Add note..."
+                      />
+                      <Edit2 className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </td>
+                </tr>
               ))}
-            </ol>
-          )}
+            </tbody>
+          </table>
         </div>
       </div>
       <div>
@@ -119,40 +122,7 @@ const ReviewsHistoryTab: React.FC<ReviewsHistoryTabProps> = ({ reviews, engageme
           </button>
         </div>
       </div>
-      <div>
-        <h2 className="text-xl font-semibold text-foreground mb-4">Historical Audit Data</h2>
-        <div className="bg-card dark:bg-card border border-border rounded-lg p-6 transition-colors">
-          {historicalEngagements.length === 0 ? (
-            <div className="text-gray-600 dark:text-gray-300">No completed engagements found.</div>
-          ) : (
-            <ul className="space-y-2">
-              {historicalEngagements.map(e => (
-                <li key={e.id} className="flex items-center justify-between">
-                  <div>
-                    <span className="font-semibold text-foreground">{e.clientName}</span>
-                    <span className="ml-2 text-sm text-muted-foreground">({e.type}, {e.framework})</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const archive = { engagement: e };
-                      const blob = new Blob([JSON.stringify(archive, null, 2)], { type: 'application/json' });
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      a.download = `audit-archive-${e.clientName || e.id}.json`;
-                      a.click();
-                      window.URL.revokeObjectURL(url);
-                    }}
-                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs font-medium"
-                  >
-                    <Download className="h-4 w-4" /> Download
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+      {/* Removed Historical Audit Data (History) section as per requirements */}
     </div>
   );
 };

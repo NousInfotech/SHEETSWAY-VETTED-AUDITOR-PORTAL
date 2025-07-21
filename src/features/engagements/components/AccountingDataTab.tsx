@@ -3,11 +3,40 @@ import { AccountingData } from '../types/engagement-types';
 import { arrayToCSV, csvToArray, downloadCSV } from '../utils/csv-utils';
 import { TrendingUp, BarChart3, Download, Upload, Search } from 'lucide-react';
 
+const mockIntegrations = [
+  { id: '1', service: 'Apideck', status: 'Connected', enabled: true, createdAt: '2024-07-20' },
+  { id: '2', service: 'Plaid', status: 'Connected', enabled: true, createdAt: '2024-07-18' },
+];
+
 interface AccountingDataTabProps {
   data: AccountingData[];
 }
 
 const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadIntegrations() {
+      setLoading(true);
+      setError(null);
+      try {
+        // No actual integration loading logic removed
+      } catch (err) {
+        setError('Failed to load integrations');
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadIntegrations();
+  }, []);
+
+  function handleDeleteApideck(id: string) {
+    // No actual deletion logic removed
+  }
+  function handleDeletePlaid(id: string) {
+    // No actual deletion logic removed
+  }
   const [activeTab, setActiveTab] = useState<'generalLedger' | 'trialBalance' | 'journalEntries'>('generalLedger');
   const [filteredData, setFilteredData] = useState(data);
   // Sync filteredData with data prop
@@ -68,6 +97,30 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
 
   return (
     <div className="space-y-6">
+      {/* Connected Integrations Section (mocked) */}
+      <div>
+        <h2 className="text-xl font-semibold text-foreground mb-4">Connected Integrations</h2>
+        <table className="w-full mb-6">
+          <thead>
+            <tr>
+              <th className="text-left px-4 py-2">Service</th>
+              <th className="text-left px-4 py-2">Status</th>
+              <th className="text-left px-4 py-2">Enabled</th>
+              <th className="text-left px-4 py-2">Connected</th>
+            </tr>
+          </thead>
+          <tbody>
+            {mockIntegrations.map(integration => (
+              <tr key={integration.id}>
+                <td className="px-4 py-2">{integration.service}</td>
+                <td className="px-4 py-2">{integration.status}</td>
+                <td className="px-4 py-2">{integration.enabled ? 'Yes' : 'No'}</td>
+                <td className="px-4 py-2">{integration.createdAt}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-foreground">Accounting Data (Apideck)</h2>
         <div className="flex items-center gap-2">

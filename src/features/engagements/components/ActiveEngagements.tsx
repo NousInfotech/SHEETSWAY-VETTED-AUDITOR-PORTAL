@@ -241,8 +241,13 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               <h3 className='text-foreground mb-1 text-lg font-semibold'>
                 {engagement.clientName}
               </h3>
+              {/* Accepted Proposal (placeholder) */}
+              <p className='mb-1 text-sm text-green-700 dark:text-green-300'>
+                Accepted Proposal: View proposal details
+              </p>
+              {/* Scope */}
               <p className='mb-2 text-sm text-gray-600 dark:text-gray-300'>
-                {engagement.description}
+                Scope: {engagement.description}
               </p>
               <div className='flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400'>
                 <div className='flex items-center gap-1'>
@@ -307,13 +312,6 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
             </div>
           </div>
           <div className='flex w-full items-center justify-between'>
-            <div className='flex items-center gap-1'>
-              <User className='h-4 w-4 text-gray-500 dark:text-gray-400' />
-              <span className='text-sm whitespace-nowrap text-gray-600 dark:text-gray-300'>
-                {engagement.teamMembers.length} member
-                {engagement.teamMembers.length !== 1 ? 's' : ''}
-              </span>
-            </div>
             <button
               onClick={() => onEnterWorkspace(engagement)}
               className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'

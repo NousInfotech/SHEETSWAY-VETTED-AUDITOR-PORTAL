@@ -554,6 +554,8 @@ type FormValues = z.infer<typeof ProposalFormSchema>;
 interface ProposalFormProps {
   proposalToEdit?: Proposal | null;
   clientRequestId?: string;
+  auditorId?: string;
+  auditFirmId?: string;
   onFormSubmit?: () => void;
   isModalMode?: boolean;
 }
@@ -570,6 +572,8 @@ const currencySymbols: Record<Currency, string> = {
 export function CreateProposalForm({
   proposalToEdit,
   clientRequestId,
+  auditorId,
+  auditFirmId,
   onFormSubmit,
   isModalMode = false,
 }: ProposalFormProps) {
@@ -652,13 +656,15 @@ export function CreateProposalForm({
         await updateProposal(proposalToEdit.id, payload);
         toast.success('Proposal updated successfully!');
       } else {
-        if (!clientRequestId || !profile.auditFirmId) {
-            throw new Error("Missing Client Request ID or Firm ID. Cannot create proposal.");
+        const resolvedAuditorId = auditorId ?? profile.id;
+        const resolvedAuditFirmId = auditFirmId ?? profile.auditFirmId;
+        if (!clientRequestId || !resolvedAuditorId || !resolvedAuditFirmId) {
+            throw new Error("Missing Client Request ID, Auditor ID, or Firm ID. Cannot create proposal.");
         }
         const payload: CreateProposalPayload = {
           clientRequestId,
-          auditorId: profile.id,
-          auditFirmId: profile.auditFirmId,
+          auditorId: resolvedAuditorId,
+          auditFirmId: resolvedAuditFirmId,
           proposalName: data.proposalName,
           description: data.description,
           quotation: Math.round(data.quotation * 100),

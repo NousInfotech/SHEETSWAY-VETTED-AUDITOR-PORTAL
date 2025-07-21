@@ -1,7 +1,8 @@
 import React from 'react';
 import { Engagement } from '../types/engagement-types';
 import { statusConfig } from '../constants/config';
-import { ArrowLeft, Database, Banknote, FileText, History, Settings } from 'lucide-react';
+import { ArrowLeft, Database, Banknote, FileText, History, Settings, MessageCircle, Star } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface EngagementWorkspaceProps {
   engagement: Engagement;
@@ -19,6 +20,7 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
   children
 }) => {
   const StatusIcon = statusConfig[engagement.status].icon;
+  const router = useRouter();
 
   const Header = () => (
     <header className="bg-card rounded-t-xl dark:bg-card border-b border-border px-6 py-4 transition-colors">
@@ -46,17 +48,26 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
             </div>
           </div>
         </div>
+        {/* Messages Icon Button */}
+        <button
+          onClick={() => router.push(`/dashboard/connect?engagementId=${engagement.id}`)}
+          className="p-2 rounded-lg bg-muted hover:bg-muted/70 transition-colors ml-4"
+          aria-label="Open Messages"
+        >
+          <MessageCircle className="h-6 w-6 text-foreground" />
+        </button>
       </div>
     </header>
   );
 
   const TabNavigation = () => {
     const tabs = [
-      { id: 'accounting', label: 'Accounting Data', icon: Database },
+      { id: 'accounting', label: 'Audit Access', icon: Database },
       { id: 'banking', label: 'Banking Data', icon: Banknote },
-      { id: 'payments', label: 'Payments & Contracts', icon: FileText },
-      { id: 'reviews', label: 'Reviews & History', icon: History },
-      { id: 'settings', label: 'Settings', icon: Settings }
+      { id: 'payments', label: 'Payments & Escrow', icon: FileText },
+      { id: 'reviews', label: 'Milestones', icon: History },
+      { id: 'documents', label: 'Documents', icon: FileText },
+      { id: 'settings', label: 'Settings', icon: Settings },
     ];
     return (
       <nav className="bg-card dark:bg-card border-b border-border px-6 transition-colors">
