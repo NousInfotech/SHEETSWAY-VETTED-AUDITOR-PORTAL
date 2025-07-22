@@ -70,6 +70,8 @@ import { useState, ChangeEvent, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '../ui/badge';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores/authStore';
+
 
 type FormValues = z.infer<typeof FullFirmRegistrationSchema>;
 
@@ -119,6 +121,7 @@ export function AuditFirmRegistrationForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const firebaseUser = useAuthStore((state) => state.firebaseUser);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FullFirmRegistrationSchema),
@@ -559,7 +562,7 @@ export function AuditFirmRegistrationForm() {
 
               <div className='space-y-6'>
                 <h3 className='border-b pb-2 text-xl font-semibold tracking-tight'>
-                  Your Superadmin Account
+                  Auditor Registration
                 </h3>
                 <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
                   <FormField
@@ -611,7 +614,7 @@ export function AuditFirmRegistrationForm() {
                           <Input
                             type='email'
                             {...field}
-                            readOnly
+                            // readOnly
                             className='bg-muted cursor-default focus-visible:ring-0 focus-visible:ring-offset-0'
                           />
                         </FormControl>

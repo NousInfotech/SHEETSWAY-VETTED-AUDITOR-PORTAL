@@ -16,9 +16,6 @@ import { useRouter } from 'next/navigation'; // Use useRouter instead of redirec
 import Image from 'next/image';
 import { toast } from 'sonner';
 
-// Import the new API service function
-import { createBackendUser } from '@/lib/services/userService';
-
 interface SignUpViewPageProps {
   isDark?: boolean;
   onToggleTheme?: () => void;
@@ -59,13 +56,6 @@ export default function SignUpViewPage({
       // This makes it available for the backend creation step
       await updateProfile(userCredential.user, { displayName: fullName });
 
-      // Step 3: Create the corresponding user in your backend database
-      await createBackendUser(userCredential.user);
-
-      toast.success('Account created successfully!', {
-        description: 'Redirecting you to the next step...'
-      });
-
       // Step 4: Redirect to the next part of the onboarding flow
       router.push('/auth/audit-firm'); // Or another appropriate page
     } catch (err: any) {
@@ -86,10 +76,6 @@ export default function SignUpViewPage({
       const provider = new GoogleAuthProvider();
       // Step 1: Sign in with Google via Firebase popup
       const result = await signInWithPopup(auth, provider);
-
-      // Step 2: Create the corresponding user in your backend
-      // The `displayName` is automatically populated by Google
-      await createBackendUser(result.user);
 
       toast.success('Signed in with Google successfully!', {
         description: 'Redirecting you to the next step...'

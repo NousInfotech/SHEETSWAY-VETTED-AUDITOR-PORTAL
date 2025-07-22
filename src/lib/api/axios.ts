@@ -61,6 +61,7 @@
 import axios from 'axios';
 import { auth } from '@/lib/firebase';
 import { useProfileStore } from '@/stores/useProfileStore';
+import { useAuth } from '@/components/layout/providers';
 
 // This allows us to pass a custom `activeRole` in our axios config
 declare module 'axios' {
@@ -79,6 +80,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   async (config) => {
     const user = auth.currentUser;
+    // const {user} = useAuth();
     if (user) {
       const token = await user.getIdToken();
       config.headers.Authorization = `Bearer ${token}`;

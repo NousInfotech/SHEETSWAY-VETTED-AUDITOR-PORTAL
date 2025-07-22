@@ -47,7 +47,7 @@ export default function SignInViewPage({
       const token = await userCredential.user.getIdToken();
       
        // Step 2: Fetch the profile data. This also verifies the user exists.
-      const profileData = await getProfileOnSignIn(token, 'AUDITOR'); // Specify the role
+      const profileData = await getProfileOnSignIn(token, 'AUDITOR'); 
       
       if (!profileData) {
         // If they don't exist, sign them out of Firebase and show an error.

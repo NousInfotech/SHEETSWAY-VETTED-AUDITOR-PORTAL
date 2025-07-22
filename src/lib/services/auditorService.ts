@@ -1,11 +1,38 @@
 import api from '@/lib/api/axios';
-import { AuditorProfile } from '@/stores/useProfileStore';
-import { AccountStatus, AuditorRole, Currency } from '@/lib/validators/auditor-schema';
 
 
-export type { AuditorProfile }; 
+// 1. ENUMS (UNCHANGED)
+// =================================
 
-// A single, generic type for all successful API responses from your backend
+export enum AuditorRole {
+  JUNIOR = "JUNIOR",
+  SENIOR = "SENIOR",
+  PARTNER = "PARTNER",
+  SUPERADMIN = "SUPERADMIN",
+}
+
+export enum AccountStatus {
+  PENDING = "PENDING",
+  VERIFIED = "VERIFIED",
+  BANNED = "BANNED",
+}
+
+export enum VettedStatus {
+  NOT_APPLIED = "NOT_APPLIED",
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
+
+export enum Currency {
+  USD = "USD",
+  EUR = "EUR",
+  GBP = "GBP",
+  INR = "INR",
+  AED = "AED",
+  OTHER = "OTHER",
+}
+
 interface ApiResponse<T> {
   success: boolean;
   statusCode: number;
@@ -14,58 +41,90 @@ interface ApiResponse<T> {
 }
 
 
-export interface CreateAuditorPayload {
-    auth: {
-        name: string;
-        email: string;
-        password: string;
-    };
-    auditor: {
-      name: string;
-      licenseNumber: string;
-      role: AuditorRole;
-      yearsExperience: number;
-      accountStatus: AccountStatus;
-      payoutCurrency?: Currency | null;
-      specialties?: string[];
-      languages?: string[];
-      portfolioLinks?: string[];
-      stripeAccountId?: string | null;
-    };
+export interface AuditorProfile {
+  id: string; 
+  createdAt: string; 
+  updatedAt: string; 
+  
+  // All fields from the schema
+  name: string;
+  licenseNumber: string;
+  role: AuditorRole;
+  yearsExperience: number;
+  
+  specialties: string[];
+  languages: string[];
+  portfolioLinks: string[];
+  supportingDocs: string[];
+
+  accountStatus: AccountStatus;
+  vettedStatus: VettedStatus;
+  
+  auditFirmId: string | null;
+  stripeAccountId: string | null;
+  payoutCurrency: Currency | null;
+  
+  // Performance Metrics
+  rating: number | null;
+  reviewsCount: number | null;
+  successCount: number | null;
+  avgResponseTime: number | null;
+  avgCompletion: number | null;
 }
 
 
-export type UpdateAuditorPayload = Partial<{
+export interface UpdateAuditorPayload {
+  name?: string;
+  licenseNumber?: string;
+  role?: AuditorRole;
+  yearsExperience?: number;
+  
+  specialties?: string[];
+  languages?: string[];
+  portfolioLinks?: string[];
+  supportingDocs?: string[];
+
+  accountStatus?: AccountStatus;
+  vettedStatus?: VettedStatus;
+  
+  
+  auditFirmId?: string | null;
+  stripeAccountId?: string | null;
+  payoutCurrency?: Currency | null;
+  
+  rating?: number | null;
+  reviewsCount?: number | null;
+  successCount?: number | null;
+  avgResponseTime?: number | null;
+  avgCompletion?: number | null;
+}
+
+
+export interface CreateAuditorPayload {
+  auth: {
+    email: string;
+    password?: string;
+    name: string;
+  };
+  auditor: {
     name: string;
     licenseNumber: string;
-    yearsExperience: number;
     role: AuditorRole;
-    accountStatus: AccountStatus;
-    specialties: string[] | undefined;
-    languages: string[] | undefined;
-    payoutCurrency: Currency | null | undefined;
-    portfolioLinks: string[] | undefined;
-    stripeAccountId?: string | null; 
-}>;
-
-
-
-export async function getAuditorProfile(): Promise<AuditorProfile> {
-  const apiEndpoint = '/api/v1/auditors/get-profile';
-  try {
-    const response = await api.get<ApiResponse<AuditorProfile>>(apiEndpoint, {
-      activeRole: 'AUDITOR'
-    });
-    if (response.data && response.data.success) {
-      return response.data.data;
-    } else {
-      throw new Error(response.data.message || 'API returned success but no profile data.');
-    }
-  } catch (error) {
-    console.error("Failed to get auditor profile:", error);
-    throw error;
-  }
+    yearsExperience: number;
+    specialties?: string[];
+    languages?: string[];
+    portfolioLinks?: string[];
+    supportingDocs?: string[];
+    accountStatus?: AccountStatus;
+    vettedStatus?: VettedStatus;
+    auditFirmId?: string | null;
+    stripeAccountId?: string | null;
+    payoutCurrency?: Currency | null;
+  };
 }
+
+
+
 
 
 export async function getAllAuditors(): Promise<AuditorProfile[] | null> {
@@ -87,7 +146,26 @@ export async function getAllAuditors(): Promise<AuditorProfile[] | null> {
 }
 
 
-export async function createAuditor(payload: CreateAuditorPayload): Promise<AuditorProfile> {
+export async function getAuditorProfile(): Promise<any> {
+  const apiEndpoint = '/api/v1/auditors/get-profile';
+  try {
+    const response = await api.get<ApiResponse<AuditorProfile>>(apiEndpoint, {
+      activeRole: 'AUDITOR'
+    });
+    if (response.data && response.data.success) {
+      return response.data.data;
+    } else {
+      throw new Error(response.data.message || 'API returned success but no profile data.');
+    }
+  } catch (error) {
+    console.error("Failed to get auditor profile:", error);
+    throw error;
+  }
+}
+
+
+export async function createAuditor(payload: CreateAuditorPayload): Promise<any> {
+  console.log("Creating auditor with payload:", payload);
   const apiEndpoint = '/api/v1/auditors/subrole'; 
   try {
     const response = await api.post<ApiResponse<AuditorProfile>>(apiEndpoint, payload, {
@@ -123,4 +201,3 @@ export async function updateAuditor(auditorId: string, payload: UpdateAuditorPay
     throw error;
   }
 }
-
