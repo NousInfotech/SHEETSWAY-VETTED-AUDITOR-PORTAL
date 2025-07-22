@@ -13,7 +13,8 @@ import {
 import { AuditorRegistrationForm } from '@/components/auth-register/AuditorRegistrationForm';
 import { PlusCircle, Loader2, UserX } from 'lucide-react';
 import { useAuth } from '../layout/providers';
-import { getAllAuditors, AuditorProfile } from '@/lib/services/auditorService';
+import { getAllAuditors } from '@/lib/services/auditorService';
+import { AuditorProfile } from '@/stores/useProfileStore';
 import { toast } from 'sonner';
 import PageContainer from '@/components/layout/page-container';
 import { AuditorDetailDialog } from './AuditorDetailDialog';

@@ -1,4 +1,9 @@
 import api from '@/lib/api/axios';
+import { AuditorProfile } from '@/stores/useProfileStore';
+
+
+
+
 
 
 // 1. ENUMS (UNCHANGED)
@@ -41,36 +46,36 @@ interface ApiResponse<T> {
 }
 
 
-export interface AuditorProfile {
-  id: string; 
-  createdAt: string; 
-  updatedAt: string; 
+// export interface AuditorProfile {
+//   id: string; 
+//   createdAt: string; 
+//   updatedAt: string; 
   
-  // All fields from the schema
-  name: string;
-  licenseNumber: string;
-  role: AuditorRole;
-  yearsExperience: number;
+//   // All fields from the schema
+//   name: string;
+//   licenseNumber: string;
+//   role: AuditorRole;
+//   yearsExperience: number;
   
-  specialties: string[];
-  languages: string[];
-  portfolioLinks: string[];
-  supportingDocs: string[];
+//   specialties: string[];
+//   languages: string[];
+//   portfolioLinks: string[];
+//   supportingDocs: string[];
 
-  accountStatus: AccountStatus;
-  vettedStatus: VettedStatus;
+//   accountStatus: AccountStatus;
+//   vettedStatus: VettedStatus;
   
-  auditFirmId: string | null;
-  stripeAccountId: string | null;
-  payoutCurrency: Currency | null;
+//   auditFirmId: string | null;
+//   stripeAccountId: string | null;
+//   payoutCurrency: Currency | null;
   
-  // Performance Metrics
-  rating: number | null;
-  reviewsCount: number | null;
-  successCount: number | null;
-  avgResponseTime: number | null;
-  avgCompletion: number | null;
-}
+//   // Performance Metrics
+//   rating: number | null;
+//   reviewsCount: number | null;
+//   successCount: number | null;
+//   avgResponseTime: number | null;
+//   avgCompletion: number | null;
+// }
 
 
 export interface UpdateAuditorPayload {

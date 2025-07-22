@@ -232,9 +232,11 @@ export function AuditFirmRegistrationForm() {
       toast.success('Firm Registration Successful! 🚀');
       form.reset();
       setSelectedFiles([]);
-      setTimeout(() => {
+      if(response.data){
+        setTimeout(() => {
         router.push('/dashboard/overview');
       }, 1000);
+      }
     } catch (error) {
       console.error('Registration failed:', error);
       let errorMessage = 'An unexpected error occurred.';

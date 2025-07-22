@@ -11,7 +11,7 @@ export default function Page() {
 
   useEffect(() => {
     router.push('/auth/sign-in');
-  }, [])
+  }, [router])
 
   
   return;

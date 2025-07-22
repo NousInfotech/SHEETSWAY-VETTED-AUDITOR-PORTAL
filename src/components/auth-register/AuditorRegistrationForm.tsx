@@ -119,7 +119,7 @@ export function AuditorRegistrationForm({
           auditorToEdit.portfolioLinks?.map((link) => ({ value: link })) || []
       });
     }
-  }, [auditorToEdit, isEditMode, form.reset]);
+  }, [auditorToEdit, isEditMode, form, form.reset]);
 
   const {
     fields: portfolioFields,
