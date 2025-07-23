@@ -228,6 +228,7 @@ export function AuditFirmRegistrationForm() {
       const response = await axios.post(apiEndpoint, requestBody, {
         headers: { Authorization: `Bearer ${idToken}` }
       });
+      console.log(response.data)
 
       toast.success('Firm Registration Successful! 🚀');
       form.reset();

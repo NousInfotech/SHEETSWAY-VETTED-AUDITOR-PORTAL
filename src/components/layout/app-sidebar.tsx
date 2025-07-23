@@ -73,6 +73,8 @@ export default function AppSidebar() {
     console.log('Switching to tenant:', tenantId);
   };
 
+  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
+
   const activeTenant = tenants[0];
 
   React.useEffect(() => {
@@ -102,6 +104,12 @@ export default function AppSidebar() {
                       <SidebarMenuButton
                         tooltip={item.title}
                         isActive={pathname === item.url}
+                        className={
+                          my_profile.role === 'JUNIOR' &&
+                          item.title === 'Messaging & Meetings'
+                            ? 'bg-muted text-muted-foreground cursor-not-allowed' // Using common disabled classes
+                            : '' // Provide an empty string for the "else" case
+                        }
                       >
                         {item.icon && <Icon />}
                         <span>{item.title}</span>

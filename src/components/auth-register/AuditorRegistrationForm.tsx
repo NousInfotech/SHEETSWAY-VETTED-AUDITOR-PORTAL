@@ -49,15 +49,7 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
-import { auth } from '@/lib/firebase';
-import {
-  createUserWithEmailAndPassword,
-  deleteUser,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile
-} from 'firebase/auth';
-import { createBackendUser } from '@/lib/services/userService';
+
 
 type FormValues = z.infer<typeof AuditorFormSchema>;
 

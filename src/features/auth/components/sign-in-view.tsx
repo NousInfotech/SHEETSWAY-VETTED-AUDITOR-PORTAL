@@ -58,6 +58,7 @@ export default function SignInViewPage({
       
       // Step 3: If they exist, proceed
       setProfile(profileData);
+      localStorage.setItem("userProfile", JSON.stringify(profileData));
 
       toast.success("Welcome back!");
       router.push('/dashboard/overview'); // Redirect to dashboard
@@ -87,6 +88,7 @@ export default function SignInViewPage({
             throw new Error("No account is associated with this Google account. Please sign up first.");
         }
         setProfile(profileData);
+        localStorage.setItem("userProfile", JSON.stringify(profileData));
         toast.success("Welcome back!");
         router.push('/dashboard/overview');
     } catch (err: any) {

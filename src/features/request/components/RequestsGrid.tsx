@@ -54,6 +54,8 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
     const [isPreviewOpen, setIsPreviewOpen] = useState(false)
     const [isSubmitModelOpen, setIsSubmitModelOpen] = useState(false)
     const profile = useProfileStore.getState().profile;
+    const my_profile = JSON.parse(localStorage.getItem("userProfile")!);
+    const my_role = my_profile.role
 
   const onClose = () => {
     setIsPreviewOpen(false)
@@ -255,8 +257,9 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                     onClick={() => {
                       onSubmitProposal(request);
                     }}
-                    disabled={hasSubmitted}
-                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none ${
+                    
+                    disabled={hasSubmitted || ['JUNIOR', 'SENIOR'].includes(my_profile.role)}
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none  disabled:bg-gray-400 disabled:text-gray-800 disabled:cursor-not-allowed ${
                       hasSubmitted
                         ? 'cursor-default bg-green-600/90 text-white'
                         : 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -431,8 +434,8 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                       setSelectedClientRequest(request)
                       setIsSubmitModelOpen(true)
                     }}
-                    disabled={hasSubmitted}
-                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none ${
+                    disabled={hasSubmitted || ['JUNIOR', 'SENIOR'].includes(my_profile.role)}
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none disabled:bg-gray-400 disabled:text-gray-800 disabled:cursor-not-allowed ${
                       hasSubmitted
                         ? 'cursor-default bg-green-600/90 text-white'
                         : 'bg-primary text-primary-foreground hover:bg-primary/90'

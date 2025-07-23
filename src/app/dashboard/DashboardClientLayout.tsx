@@ -9,7 +9,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { useProfileStore } from '@/stores/useProfileStore';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function DashboardClientLayout({
   children,
@@ -20,22 +20,47 @@ export default function DashboardClientLayout({
 }) {
   const router = useRouter();
   const { user, loading } = useAuth();
-  const profile = useProfileStore((state) => state.profile);
 
+  // 1. Create state to hold the profile from localStorage. Initialize to null.
+  const [localProfile, setLocalProfile] = useState<any | null>(null);
+  // 2. Create a state to know when the localStorage has been checked.
+  const [isStorageChecked, setIsStorageChecked] = useState(false);
+
+  // 3. This effect runs only on the client after the component mounts.
   useEffect(() => {
-    if (loading) {
-      return; // Still loading, do nothing yet
+    // Access localStorage safely inside useEffect
+    const profileString = localStorage.getItem('userProfile');
+    if (profileString) {
+      try {
+        setLocalProfile(JSON.parse(profileString));
+      } catch (error) {
+        console.error('Failed to parse userProfile from localStorage', error);
+
+        localStorage.removeItem('userProfile');
+      }
     }
+    // Mark that we have finished checking localStorage
+    setIsStorageChecked(true);
+  }, []);
+
+  // 4. This effect handles all redirection logic.
+  useEffect(() => {
+    // Wait until auth loading and localStorage check are complete
+    if (loading || !isStorageChecked) {
+      return;
+    }
+
     if (!user) {
       router.push('/auth/sign-in');
       return;
     }
-    if (!profile) {
+
+    if (!localProfile) {
       router.push('/auth/audit-firm');
     }
-  }, [user, profile, loading, router]);
+  }, [user, loading, localProfile, isStorageChecked, router]);
 
-  if (loading || !user || !profile) {
+  if (!localProfile) {
     return (
       <div className='flex h-screen w-full items-center justify-center'>
         <Loader2 className='text-muted-foreground h-10 w-10 animate-spin' />

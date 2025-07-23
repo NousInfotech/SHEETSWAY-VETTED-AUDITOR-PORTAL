@@ -30,6 +30,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
   onEnterWorkspace,
   onRefresh
 }) => {
+  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filters, setFilters] = useState<Filters>({
     search: '',
@@ -314,7 +315,13 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           <div className='flex w-full items-center justify-between'>
             <button
               onClick={() => onEnterWorkspace(engagement)}
-              className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
+                my_profile.role === 'JUNIOR'
+                  ? 'bg-muted text-muted-foreground cursor-not-allowed' // Styles for JUNIOR
+                  : 'bg-blue-600 text-white hover:bg-blue-700' // Styles for everyone else
+              }`}
+              // 3. IMPORTANT: Also disable the button functionally
+              disabled={my_profile.role === 'JUNIOR'}
             >
               <Play className='h-4 w-4' />
               Enter Workspace
