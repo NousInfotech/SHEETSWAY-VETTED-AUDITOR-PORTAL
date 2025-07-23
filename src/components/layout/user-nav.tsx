@@ -55,6 +55,7 @@ export function UserNav() {
           <DropdownMenuItem
             onClick={async () => {
               await signOut(auth);
+              localStorage.clear();
               router.push('/auth/sign-in');
             }}
           >

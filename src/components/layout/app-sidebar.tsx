@@ -212,6 +212,7 @@ export default function AppSidebar() {
                   <Button
                     onClick={async () => {
                       await signOut(auth);
+                      localStorage.clear();
                       router.push('/auth/sign-in');
                     }}
                   >
