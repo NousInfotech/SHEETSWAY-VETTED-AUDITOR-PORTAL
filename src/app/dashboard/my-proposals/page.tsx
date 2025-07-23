@@ -204,7 +204,7 @@ export default function MyProposalsPage() {
     <>
       <PageContainer>
         <div className='container mx-auto py-8'>
-          <h1 className='mb-6 text-3xl font-bold'>My Proposals</h1>
+          <h1 className='mb-6 text-3xl font-bold'>Proposals</h1>
           {renderContent()}
         </div>
       </PageContainer>
