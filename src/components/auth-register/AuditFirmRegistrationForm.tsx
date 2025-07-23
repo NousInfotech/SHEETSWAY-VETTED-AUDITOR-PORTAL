@@ -71,7 +71,10 @@ import { toast } from 'sonner';
 import { Badge } from '../ui/badge';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
-
+import { getProfileOnSignIn } from '@/lib/services/userService';
+import { signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useProfileStore } from '@/stores/useProfileStore';
 
 type FormValues = z.infer<typeof FullFirmRegistrationSchema>;
 
@@ -122,6 +125,8 @@ export function AuditFirmRegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const firebaseUser = useAuthStore((state) => state.firebaseUser);
+
+  const setProfile = useProfileStore((state) => state.setProfile);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FullFirmRegistrationSchema),
@@ -228,15 +233,62 @@ export function AuditFirmRegistrationForm() {
       const response = await axios.post(apiEndpoint, requestBody, {
         headers: { Authorization: `Bearer ${idToken}` }
       });
-      console.log(response.data)
 
-      toast.success('Firm Registration Successful! 🚀');
-      form.reset();
-      setSelectedFiles([]);
-      if(response.data){
-        setTimeout(() => {
-        router.push('/dashboard/overview');
-      }, 1000);
+      console.log(response.data);
+
+      if (response.data && response.data.success) {
+        // We successfully created the user. Now, we must fetch their profile.
+
+        const MAX_RETRIES = 5;
+        const RETRY_DELAY = 1000; // 1 second
+        let profileData = null;
+
+        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+          console.log(`Fetching profile, attempt ${attempt}...`);
+
+          const fetchedProfile = await getProfileOnSignIn(idToken, 'AUDITOR');
+
+          if (fetchedProfile) {
+            // Success! We got the profile.
+            profileData = fetchedProfile;
+            console.log('Profile fetched successfully!');
+            break; // Exit the loop
+          }
+
+          // If profile not found, wait and retry (unless it's the last attempt)
+          if (attempt < MAX_RETRIES) {
+            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+          }
+        }
+
+        // After the loop, check if we ever succeeded.
+        if (profileData) {
+          // HAPPY PATH: We got the profile data.
+          setProfile(profileData);
+          localStorage.setItem('userProfile', JSON.stringify(profileData));
+
+          toast.success('Firm Registration Successful! 🚀');
+          router.push('/dashboard/overview');
+
+          form.reset();
+          setSelectedFiles([]);
+        } else {
+          // UNHAPPY PATH: All retries failed. This is a real error.
+          // Do NOT sign the user out. Their account exists. Guide them.
+          console.error(
+            `Failed to fetch profile after ${MAX_RETRIES} attempts.`
+          );
+          // Throw a more accurate error to be caught by the main catch block.
+          throw new Error(
+            'Your registration was successful, but we could not retrieve your profile. Please try logging in again.'
+          );
+        }
+      } else {
+        // Handle cases where the API returns a 200 OK status but indicates failure in the body.
+        throw new Error(
+          response.data.message ||
+            'API returned a success status but indicated failure.'
+        );
       }
     } catch (error) {
       console.error('Registration failed:', error);

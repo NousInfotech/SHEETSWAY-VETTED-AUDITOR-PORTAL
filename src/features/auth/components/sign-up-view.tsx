@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  signOut,
   updateProfile // Import updateProfile
 } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,8 @@ import type React from 'react';
 import { useRouter } from 'next/navigation'; // Use useRouter instead of redirect
 import Image from 'next/image';
 import { toast } from 'sonner';
+import { getProfileOnSignIn } from '@/lib/services/userService';
+import { useProfileStore } from '@/stores/useProfileStore';
 
 interface SignUpViewPageProps {
   isDark?: boolean;
@@ -33,6 +36,8 @@ export default function SignUpViewPage({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter(); // Use the router for client-side navigation
+
+  const setProfile = useProfileStore((state) => state.setProfile);
 
   // --- LOGIC CHANGE 1: UPDATED EMAIL/PASSWORD SIGN-UP ---
   const handleSignUp = async (e: React.FormEvent) => {
