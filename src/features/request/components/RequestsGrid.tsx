@@ -27,8 +27,6 @@ import { AiReportDialog } from '@/components/dialogs/AiReportDialog';
 import { mapClientRequestToReportData } from '@/lib/mappers';
 import { ReportData } from '@/components/ai-mock/flowing-audit-report';
 
-
-
 interface RequestsGridProps {
   clientRequests: ClientRequest[];
   requests: EngagementRequest[];
@@ -38,8 +36,6 @@ interface RequestsGridProps {
   onSubmitProposal: (request: EngagementRequest) => void;
   isProposalSubmitted: (id: number) => boolean;
 }
-
-
 
 const RequestsGrid: React.FC<RequestsGridProps> = ({
   clientRequests,
@@ -53,13 +49,13 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   const [selectedClientRequest, setSelectedClientRequest] =
     useState<ClientRequest | null>(null);
 
-    const [aiReportData, setAiReportData] = useState<ReportData | null>(null);
+  const [aiReportData, setAiReportData] = useState<ReportData | null>(null);
 
-    // --- HANDLER FOR THE "KNOW MORE" BUTTON ---
+  // --- HANDLER FOR THE "KNOW MORE" BUTTON ---
   const handleOpenAiReport = (request: ClientRequest) => {
     // 1. Map the request data to the AI report format
     const reportData = mapClientRequestToReportData(request);
-    
+
     // 2. Set the data for the AI report dialog
     setAiReportData(reportData);
 
@@ -67,24 +63,21 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
     setSelectedClientRequest(null);
   };
 
-    const [isopen, setIsopen] = useState(false)
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false)
-    const [isSubmitModelOpen, setIsSubmitModelOpen] = useState(false)
-    const profile = useProfileStore.getState().profile;
-    const my_profile = JSON.parse(localStorage.getItem("userProfile")!);
-    const my_role = my_profile.role
+  const [isopen, setIsopen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isSubmitModelOpen, setIsSubmitModelOpen] = useState(false);
+  const profile = useProfileStore.getState().profile;
+  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
+  const my_role = my_profile.role;
 
   const onClose = () => {
-    setIsPreviewOpen(false)
+    setIsPreviewOpen(false);
   };
   const onCloseSubmitModel = () => {
-    setIsSubmitModelOpen(false)
+    setIsSubmitModelOpen(false);
   };
 
-  
-  const handleSubmitProposal = () => {
-
-  }
+  const handleSubmitProposal = () => {};
 
   if (requests.length === 0) {
     return (
@@ -106,6 +99,182 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
 
   return (
     <div className='space-y-6'>
+      {/* <div className='text-center font-bold text-red-600 text-3xl'>
+        <h1 >Client Requests Starts from Here</h1>
+            <p >you can submit proposal only for client requests below</p>
+      </div> */}
+
+      {/* Client Requests */}
+
+      {clientRequests.map((request: any) => {
+        const isBookmarked = bookmarkedRequests.includes(request.id);
+        const hasSubmitted = isProposalSubmitted(request.id);
+
+        return (
+          <div
+            key={request.id}
+            className='bg-card text-card-foreground rounded-xl border shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg'
+          >
+            <div className='p-5 sm:p-6'>
+              {/* --- Card Header --- */}
+              <div className='mb-4 flex items-start justify-between'>
+                <div className='flex-1'>
+                  {/* Tags and Badges */}
+                  <div className='mb-3 flex flex-wrap items-center gap-2'>
+                    <span className='bg-primary/10 text-primary inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold'>
+                      {request.type}
+                    </span>
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${getUrgencyColor(request.urgency)}`}
+                    >
+                      {request.urgency}
+                    </span>
+                  </div>
+
+                  {/* Main Title */}
+                  <h3 className='text-foreground text-lg sm:text-xl'>
+                    {request.title.toUpperCase()}
+                  </h3>
+                  <p className='text-muted-foreground mt-1 text-sm'>
+                    Framework: {request.framework} • Submitted:{' '}
+                    {formatDate(request.auditEnd)}
+                  </p>
+                </div>
+
+                {/* Bookmark Button with Icon */}
+                <button
+                  onClick={() => onToggleBookmark(request.id)}
+                  className='text-muted-foreground hover:bg-muted hover:text-primary ml-4 rounded-full p-2 transition-colors'
+                  aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                >
+                  <Bookmark
+                    size={22}
+                    className={`transition-all duration-200 ${isBookmarked ? 'fill-primary text-primary' : 'fill-transparent'}`}
+                  />
+                </button>
+              </div>
+
+              {/* --- Key Information Section with Icons --- */}
+              <div className='border-border my-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-b py-4 text-sm md:grid-cols-4'>
+                <div className='text-foreground flex items-center gap-2'>
+                  <DollarSign className='text-muted-foreground h-4 w-4' />
+                  <span className='font-medium'>{request.budget}</span>
+                </div>
+                <div className='text-foreground flex items-center gap-2'>
+                  <CalendarDays className='text-muted-foreground h-4 w-4' />
+                  <span>Due: {formatDate(request.deadline)}</span>
+                </div>
+                <div className='text-foreground flex items-center gap-2'>
+                  <MapPin className='text-muted-foreground h-4 w-4' />
+
+                  <span>{request.timeZone}</span>
+                </div>
+                <div className='text-foreground flex items-center gap-2'>
+                  <Paperclip className='text-muted-foreground h-4 w-4' />
+                  <span>
+                    {request.specialFlags.map(
+                      (element: string, index: number) => (
+                        <p key={index}>{element}</p>
+                      )
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {/* Project Notes */}
+              <div>
+                <h4 className='text-foreground mb-2 font-semibold'>
+                  Project Notes
+                </h4>
+                <p className='text-muted-foreground line-clamp-3 text-sm'>
+                  {request.notes}
+                </p>
+              </div>
+
+              {request.specialFlags.length > 0 && (
+                <div className='mt-5'>
+                  <h4 className='text-foreground mb-3 font-semibold'>
+                    Attachments
+                  </h4>
+                </div>
+              )}
+
+              {/* --- Card Footer: Client Info & Actions --- */}
+              <div className='border-border mt-5 flex flex-col items-start justify-between gap-4 border-t pt-5 sm:flex-row sm:items-center'>
+                {/* Client Info */}
+                <div className='flex items-center gap-3'>
+                  {request.anonymous ? (
+                    <>
+                      <UserCircle className='text-muted-foreground/80 h-9 w-9' />
+                      <div className='text-sm'>
+                        <span className='text-foreground font-semibold'>
+                          Anonymous Client
+                        </span>
+                        <p className='text-muted-foreground'>
+                          Identity protected
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className='text-sm'>
+                        <div className='flex items-end gap-5'>
+                          <div className='flex-col'>
+                            <span className='text-foreground font-semibold'>
+                              {request.timeZone}
+                            </span>
+                            <p className='text-muted-foreground'>
+                              Verified Client
+                            </p>
+                          </div>
+                          <p>Available on:&nbsp;{request.workingHours}</p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className='flex w-full items-center gap-3 sm:w-auto'>
+                  <button
+                    onClick={() => {
+                      setSelectedClientRequest(request);
+                      setIsPreviewOpen(true);
+                    }}
+                    className='border-border hover:bg-muted bg-card text-foreground flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors sm:flex-none'
+                  >
+                    <Eye size={16} />
+                    Preview
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedClientRequest(request);
+                      setIsSubmitModelOpen(true);
+                    }}
+                    disabled={
+                      hasSubmitted ||
+                      ['JUNIOR', 'SENIOR'].includes(my_profile.role)
+                    }
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-800 sm:flex-none ${
+                      hasSubmitted
+                        ? 'cursor-default bg-green-600/90 text-white'
+                        : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    }`}
+                  >
+                    {hasSubmitted ? (
+                      <CheckCircle size={16} />
+                    ) : (
+                      <Send size={16} />
+                    )}
+                    {hasSubmitted ? 'Submitted' : 'Submit Proposal'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
       {requests.map((request) => {
         const isBookmarked = bookmarkedRequests.includes(request.id);
         const hasSubmitted = isProposalSubmitted(request.id);
@@ -274,9 +443,11 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                     onClick={() => {
                       onSubmitProposal(request);
                     }}
-                    
-                    disabled={hasSubmitted || ['JUNIOR', 'SENIOR'].includes(my_profile.role)}
-                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none  disabled:bg-gray-400 disabled:text-gray-800 disabled:cursor-not-allowed ${
+                    disabled={
+                      hasSubmitted ||
+                      ['JUNIOR', 'SENIOR'].includes(my_profile.role)
+                    }
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-800 sm:flex-none ${
                       hasSubmitted
                         ? 'cursor-default bg-green-600/90 text-white'
                         : 'bg-primary text-primary-foreground hover:bg-primary/90'
@@ -296,210 +467,26 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
         );
       })}
 
+      <ClientRequestDetailDialog
+        request={selectedClientRequest}
+        isOpen={!!isPreviewOpen}
+        onClose={onClose}
+        handleSubmitProposal={handleSubmitProposal}
+        onKnowMoreFromAi={handleOpenAiReport} // Pass the new handler
+      />
 
+      <SubmitProposalDialog
+        request={selectedClientRequest!}
+        isOpen={!!isSubmitModelOpen}
+        onClose={onCloseSubmitModel}
+      />
 
-      <div className='text-center font-bold text-red-600 text-3xl'>
-        <h1 >Client Requests Starts from Here</h1>
-            <p >you can submit proposal only for client requests below</p>
-      </div>
-
-      {/* Client Requests */}
-
-      {clientRequests.map((request: any) => {
-        const isBookmarked = bookmarkedRequests.includes(request.id);
-        const hasSubmitted = isProposalSubmitted(request.id);
-
-        return (
-          <div
-            key={request.id}
-            className='bg-card text-card-foreground rounded-xl border shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg'
-          >
-            
-            <div className='p-5 sm:p-6'>
-              {/* --- Card Header --- */}
-              <div className='mb-4 flex items-start justify-between'>
-                <div className='flex-1'>
-                  {/* Tags and Badges */}
-                  <div className='mb-3 flex flex-wrap items-center gap-2'>
-                    <span className='bg-primary/10 text-primary inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold'>
-                      {request.type}
-                    </span>
-                    <span
-                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${getUrgencyColor(request.urgency)}`}
-                    >
-                      {request.urgency}
-                    </span>
-                  </div>
-
-                  {/* Main Title */}
-                  <h3 className='text-foreground text-lg font-bold sm:text-xl'>
-                    {request.title}
-                  </h3>
-                  <p className='text-muted-foreground mt-1 text-sm'>
-                    Framework: {request.framework} • Submitted:{' '}
-                    {formatDate(request.auditEnd)}
-                  </p>
-                </div>
-
-                {/* Bookmark Button with Icon */}
-                <button
-                  onClick={() => onToggleBookmark(request.id)}
-                  className='text-muted-foreground hover:bg-muted hover:text-primary ml-4 rounded-full p-2 transition-colors'
-                  aria-label={isBookmarked ? 'Remove bookmark' : 'Add bookmark'}
-                >
-                  <Bookmark
-                    size={22}
-                    className={`transition-all duration-200 ${isBookmarked ? 'fill-primary text-primary' : 'fill-transparent'}`}
-                  />
-                </button>
-              </div>
-
-              {/* --- Key Information Section with Icons --- */}
-              <div className='border-border my-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-b py-4 text-sm md:grid-cols-4'>
-                <div className='text-foreground flex items-center gap-2'>
-                  <DollarSign className='text-muted-foreground h-4 w-4' />
-                  <span className='font-medium'>{request.budget}</span>
-                </div>
-                <div className='text-foreground flex items-center gap-2'>
-                  <CalendarDays className='text-muted-foreground h-4 w-4' />
-                  <span>Due: {formatDate(request.deadline)}</span>
-                </div>
-                <div className='text-foreground flex items-center gap-2'>
-                  <MapPin className='text-muted-foreground h-4 w-4' />
-
-                  <span>{request.timeZone}</span>
-                </div>
-                <div className='text-foreground flex items-center gap-2'>
-                  <Paperclip className='text-muted-foreground h-4 w-4' />
-                  <span>
-                    {request.specialFlags.map(
-                      (element: string, index: number) => (
-                        <p key={index}>{element}</p>
-                      )
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {/* Project Notes */}
-              <div>
-                <h4 className='text-foreground mb-2 font-semibold'>
-                  Project Notes
-                </h4>
-                <p className='text-muted-foreground line-clamp-3 text-sm'>
-                  {request.notes}
-                </p>
-              </div>
-
-              {request.specialFlags.length > 0 && (
-                <div className='mt-5'>
-                  <h4 className='text-foreground mb-3 font-semibold'>
-                    Attachments
-                  </h4>
-                </div>
-              )}
-
-              {/* --- Card Footer: Client Info & Actions --- */}
-              <div className='border-border mt-5 flex flex-col items-start justify-between gap-4 border-t pt-5 sm:flex-row sm:items-center'>
-                {/* Client Info */}
-                <div className='flex items-center gap-3'>
-                  {request.anonymous ? (
-                    <>
-                      <UserCircle className='text-muted-foreground/80 h-9 w-9' />
-                      <div className='text-sm'>
-                        <span className='text-foreground font-semibold'>
-                          Anonymous Client
-                        </span>
-                        <p className='text-muted-foreground'>
-                          Identity protected
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className='text-sm'>
-                        <div className='flex items-end gap-5'>
-                          <div className='flex-col'>
-                            <span className='text-foreground font-semibold'>
-                              {request.timeZone}
-                            </span>
-                            <p className='text-muted-foreground'>
-                              Verified Client
-                            </p>
-                          </div>
-                          <p>Available on:&nbsp;{request.workingHours}</p>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Action Buttons */}
-                <div className='flex w-full items-center gap-3 sm:w-auto'>
-                  <button
-                    onClick={() => {
-                      setSelectedClientRequest(request)
-                      setIsPreviewOpen(true)
-                    }}
-                    className='border-border hover:bg-muted bg-card text-foreground flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors sm:flex-none'
-                  >
-                    <Eye size={16} />
-                    Preview
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSelectedClientRequest(request)
-                      setIsSubmitModelOpen(true)
-                    }}
-                    disabled={hasSubmitted || ['JUNIOR', 'SENIOR'].includes(my_profile.role)}
-                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none disabled:bg-gray-400 disabled:text-gray-800 disabled:cursor-not-allowed ${
-                      hasSubmitted
-                        ? 'cursor-default bg-green-600/90 text-white'
-                        : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    }`}
-                  >
-                    {hasSubmitted ? (
-                      <CheckCircle size={16} />
-                    ) : (
-                      <Send size={16} />
-                    )}
-                    {hasSubmitted ? 'Submitted' : 'Submit Proposal'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-
-      
-        <ClientRequestDetailDialog
-          request={selectedClientRequest}
-          isOpen={!!isPreviewOpen}
-          onClose={onClose}
-          handleSubmitProposal={handleSubmitProposal}
-          onKnowMoreFromAi={handleOpenAiReport} // Pass the new handler
-         />
-
-
-        <SubmitProposalDialog
-          request={selectedClientRequest!}
-          isOpen={!!isSubmitModelOpen}
-          onClose={onCloseSubmitModel}
-          
-         />
-
-
-
-
-         {/* --- RENDER THE  (AI REPORT) DIALOG --- */}
+      {/* --- RENDER THE  (AI REPORT) DIALOG --- */}
       <AiReportDialog
         isOpen={!!aiReportData}
         reportData={aiReportData}
         onClose={() => setAiReportData(null)}
       />
-         
-      
     </div>
   );
 };
