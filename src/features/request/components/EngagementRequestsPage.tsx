@@ -50,7 +50,14 @@ const EngagementRequestsPage: React.FC = () => {
         try {
           const data = await getClientRequests();
           if (data) {
-            setClientRequests(data);
+            const sortedRequests = data.sort((a, b) => {
+          // THE FIX: Use .getTime() to convert dates to numbers before subtracting.
+          // This sorts in descending order (newest first).
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        });
+            setClientRequests(sortedRequests);
           } else {
             setError('Failed to fetch proposals.');
             toast.error('Could not load proposals.');
