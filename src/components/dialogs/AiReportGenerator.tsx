@@ -11,13 +11,14 @@ type ReportPhase = 'LOADING' | 'ANALYZING' | 'RENDERING';
 
 interface AiReportGeneratorProps {
   reportData: ReportData;
+
+  onPhaseChange: (phase: ReportPhase) => void;
 }
 
 const AnimationPhase = ({
   Icon,
   messages,
   title,
-
   animationClass = 'animate-pulse'
 }: {
   Icon: React.ElementType;
@@ -40,38 +41,43 @@ const AnimationPhase = ({
   }, [messages]);
 
   return (
-    <div className='flex h-full flex-col items-center justify-center p-8 text-center'>
-      <Icon className={`text-primary mb-6 h-16 w-16 ${animationClass}`} />
-      <h2 className='mb-2 text-2xl font-bold'>{title}</h2>
-      <p className='text-muted-foreground transition-opacity duration-300'>
+    <div className='p-8'>
+      <Icon
+        className={`text-primary mx-auto mb-6 h-16 w-16 ${animationClass}`}
+      />
+      <h2 className='mb-2 text-center text-2xl font-bold'>{title}</h2>
+      <p className='text-muted-foreground text-center transition-opacity duration-300'>
         {currentMessage}
       </p>
     </div>
   );
 };
 
-// --- The Main Orchestrator Component ---
-export function AiReportGenerator({ reportData }: AiReportGeneratorProps) {
+export function AiReportGenerator({
+  reportData,
+  onPhaseChange
+}: AiReportGeneratorProps) {
   const [phase, setPhase] = useState<ReportPhase>('LOADING');
 
   useEffect(() => {
-    // This effect controls the transitions between phases
+    onPhaseChange(phase);
+
     const loadingTimer = setTimeout(() => {
       setPhase('ANALYZING');
-    }, 3000); // <-- Loading phase duration: 3 seconds
+      onPhaseChange('ANALYZING');
+    }, 3000);
 
     const analyzingTimer = setTimeout(() => {
       setPhase('RENDERING');
-    }, 6000); // <-- Analyzing phase starts after 3s, lasts 3s (total 6s)
+      onPhaseChange('RENDERING');
+    }, 6000);
 
-    // Cleanup timers if the component unmounts
     return () => {
       clearTimeout(loadingTimer);
       clearTimeout(analyzingTimer);
     };
-  }, []); // Run only once on mount
+  }, [onPhaseChange]);
 
-  // Render the correct UI based on the current phase
   switch (phase) {
     case 'LOADING':
       return (
@@ -83,11 +89,9 @@ export function AiReportGenerator({ reportData }: AiReportGeneratorProps) {
             'Connecting to knowledge base...',
             'Loading analysis models...'
           ]}
-          // We explicitly pass 'animate-spin' to make the loader icon spin
           animationClass='animate-spin'
         />
       );
-
     case 'ANALYZING':
       return (
         <AnimationPhase
@@ -96,17 +100,12 @@ export function AiReportGenerator({ reportData }: AiReportGeneratorProps) {
           messages={[
             'Parsing client requirements...',
             'Cross-referencing compliance frameworks...',
-            'Identifying potential risks...',
-            'Formulating bid strategy...'
+            'Identifying potential risks...'
           ]}
-          // No prop is passed, so this will use the default 'animate-pulse'
         />
       );
-
     case 'RENDERING':
-      // Once we are in the rendering phase, show the line-by-line report
       return <FlowingAuditReport data={reportData} />;
-
     default:
       return null;
   }
