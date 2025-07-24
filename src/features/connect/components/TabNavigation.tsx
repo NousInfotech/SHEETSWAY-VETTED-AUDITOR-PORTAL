@@ -18,7 +18,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     if (my_profile.role === 'JUNIOR') {
       setActiveTab('meetings');
     }
-  }, []);
+  }, [my_profile.role, setActiveTab]);
 
   const getTabIcon = (tab: TabType) => {
     switch (tab) {

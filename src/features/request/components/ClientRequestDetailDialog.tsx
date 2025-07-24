@@ -95,7 +95,7 @@ export function ClientRequestDetailDialog({
                 <InfoItem icon={DollarSign} label="Budget" value={formatCurrency(request.budget, 'USD')} />
                 <InfoItem icon={CalendarDays} label="Deadline" value={formatDate(request.deadline)} />
                 <InfoItem icon={Clock} label="Estimated Duration" value={getDuration()} />
-                <InfoItem icon={Building} label="Financial Year" value={request.financialYear} />
+                <InfoItem icon={Building} label="Financial Year" value={formatDate(request.financialYear).split(',')[1]} />
             </div>
           </div>
 
