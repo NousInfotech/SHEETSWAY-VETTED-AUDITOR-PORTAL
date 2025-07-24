@@ -266,13 +266,13 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                      ${item.debit.toLocaleString()}
+                      €{item.debit.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                      ${item.credit.toLocaleString()}
+                      €{item.credit.toLocaleString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                      ${item.balance.toLocaleString()}
+                      €{item.balance.toLocaleString()}
                     </td>
                   </tr>
                 ))}
@@ -328,10 +328,10 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
                     {item.description}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                    ${item.debit.toLocaleString()}
+                    €{item.debit.toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-foreground bg-card dark:bg-card border-b border-border">
-                    ${item.credit.toLocaleString()}
+                    €{item.credit.toLocaleString()}
                   </td>
                 </tr>
               ))}

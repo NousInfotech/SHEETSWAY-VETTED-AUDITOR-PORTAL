@@ -37,6 +37,16 @@ interface RequestsGridProps {
   isProposalSubmitted: (id: number) => boolean;
 }
 
+
+export function capitalize(str: string | null | undefined): string {
+  // Guard clause: handles null, undefined, or empty strings
+  if (!str) {
+    return '';
+  }
+  
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 const RequestsGrid: React.FC<RequestsGridProps> = ({
   clientRequests,
   requests,
@@ -69,6 +79,8 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   const profile = useProfileStore.getState().profile;
   const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
   const my_role = my_profile.role;
+
+  
 
   const onClose = () => {
     setIsPreviewOpen(false);
