@@ -337,7 +337,7 @@ export default function HomePage() {
       <input type="file" ref={folderInputRef} onChange={handleFolderChange} className="hidden" webkitdirectory="" />
 
       <div>
-        <p className='text-red-500'>please save it, once uploaded or ceated files and folders. Then only you can view the files by double clicking on selected file </p>
+        <p className='text-red-500'>please save it, once uploaded or created files and folders. Then only you can view the files by double clicking on selected file </p>
       </div>
       <header className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Documents</h1>
