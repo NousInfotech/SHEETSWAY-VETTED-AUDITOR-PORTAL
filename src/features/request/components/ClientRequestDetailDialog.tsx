@@ -28,6 +28,8 @@ export interface ClientRequestDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
   handleSubmitProposal: (request: ClientRequest) => void;
+  // add new one
+  onKnowMoreFromAi: (request: ClientRequest) => void;
 }
 
 // A small helper component for displaying key-value pairs with icons
@@ -46,6 +48,7 @@ export function ClientRequestDetailDialog({
   isOpen,
   onClose,
   handleSubmitProposal,
+  onKnowMoreFromAi,
 }: ClientRequestDetailDialogProps) {
   if (!isOpen || !request) {
     return null;
@@ -118,6 +121,9 @@ export function ClientRequestDetailDialog({
         </div>
 
         <DialogFooter className="pt-4 border-t">
+          <Button variant="outline" onClick={() => onKnowMoreFromAi(request)}>
+            KNOW More From AI
+          </Button>
           <Button variant="outline" onClick={onClose}>Close</Button>
           <Button className='hidden' onClick={() => handleSubmitProposal(request)}>
             <Send className="mr-2 h-4 w-4" />

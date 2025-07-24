@@ -23,6 +23,9 @@ import { ClientRequest } from '@/lib/services/clientRequestService';
 import { ClientRequestDetailDialog } from './ClientRequestDetailDialog';
 import SubmitProposalDialog from './SubmitProposalDialog';
 import { useProfileStore } from '@/stores/useProfileStore';
+import { AiReportDialog } from '@/components/dialogs/AiReportDialog';
+import { mapClientRequestToReportData } from '@/lib/mappers';
+import { ReportData } from '@/components/ai-mock/flowing-audit-report';
 
 
 
@@ -49,6 +52,20 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
 }) => {
   const [selectedClientRequest, setSelectedClientRequest] =
     useState<ClientRequest | null>(null);
+
+    const [aiReportData, setAiReportData] = useState<ReportData | null>(null);
+
+    // --- HANDLER FOR THE "KNOW MORE" BUTTON ---
+  const handleOpenAiReport = (request: ClientRequest) => {
+    // 1. Map the request data to the AI report format
+    const reportData = mapClientRequestToReportData(request);
+    
+    // 2. Set the data for the AI report dialog
+    setAiReportData(reportData);
+
+    // 3. Close the first dialog
+    setSelectedClientRequest(null);
+  };
 
     const [isopen, setIsopen] = useState(false)
     const [isPreviewOpen, setIsPreviewOpen] = useState(false)
@@ -461,6 +478,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
           isOpen={!!isPreviewOpen}
           onClose={onClose}
           handleSubmitProposal={handleSubmitProposal}
+          onKnowMoreFromAi={handleOpenAiReport} // Pass the new handler
          />
 
 
@@ -470,6 +488,16 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
           onClose={onCloseSubmitModel}
           
          />
+
+
+
+
+         {/* --- RENDER THE  (AI REPORT) DIALOG --- */}
+      <AiReportDialog
+        isOpen={!!aiReportData}
+        reportData={aiReportData}
+        onClose={() => setAiReportData(null)}
+      />
          
       
     </div>
