@@ -1,61 +1,91 @@
+// src/lib/mappers.ts
+
 import { ClientRequest } from './services/clientRequestService';
-import { ReportData } from '@/components/ai-mock/flowing-audit-report'; // Adjust path if needed
+import { ReportData } from '@/components/ai-mock/flowing-audit-report';
+import { formatCurrency, formatDate } from '@/lib/utils'; // Adjust path if needed
 
 /**
- * "Mimics" an AI by analyzing a ClientRequest and generating a detailed ReportData object.
- * This is where you can add logic to make the report seem intelligent.
+ * "Mimics" an AI by analyzing a ClientRequest and generating a rich, detailed ReportData object.
  */
 export function mapClientRequestToReportData(request: ClientRequest): ReportData {
   
-  // --- AI-Powered Document Inference ---
-  // Infer required documents based on the request type and framework
-  let documents = [
-    { category: "Trial Balance", provided: true, source: "Awaiting Upload", structureClarity: { rating: 3, description: "Unknown" } },
-    { category: "General Ledger", provided: true, source: "Awaiting Upload", structureClarity: { rating: 2, description: "Unknown" } },
-    { category: "Bank Statements", provided: true, source: "Awaiting Upload", structureClarity: { rating: 3, description: "Unknown" } },
+  // --- Detailed Analysis Logic ---
+  let readinessScore = 8.0;
+  let insights: string[] = [];
+  let risks: string[] = [];
+  let strategyHints: string[] = [
+      `The client's budget is ${formatCurrency(request.budget, 'USD')}. Ensure your proposal reflects the value provided within this range.`,
+      `Communication is key. The client's preferred languages are ${request.preferredLanguages.join(', ')} and they operate in the ${request.timeZone} timezone.`
   ];
-  if (request.type === 'AUDIT') {
-    documents.push({ category: "Financial Statements (PY)", provided: false, source: "Missing", structureClarity: { rating: 0, description: "Not Provided" } });
+
+  // Analyze urgency
+  if (request.urgency === 'URGENT') {
+    readinessScore -= 2.0;
+    risks.push("The 'URGENT' flag suggests a reactive need, potentially due to external pressure or poor planning. This may lead to a chaotic engagement.");
+    strategyHints.push("An expedited timeline justifies a premium on the proposal. Clearly state the assumptions made to meet the deadline.");
   }
-  if (request.framework.includes('SOC')) {
-    documents.push({ category: "System Description", provided: false, source: "Missing", structureClarity: { rating: 0, description: "Critical" } });
+
+  // Analyze notes
+  if (!request.notes || request.notes.length < 100) {
+    readinessScore -= 1.5;
+    risks.push("The project description is sparse. Critical details may be missing, requiring extensive discovery.");
+  } else {
+    insights.push("The client provided a detailed project description, which is a positive indicator of preparedness.");
   }
   
-  // --- AI-Powered Insight Generation ---
-  let readinessScore = 7.5;
-  let quickInsight = `The request for a ${request.type} audit on the ${request.framework} framework appears standard.`;
-  let bidStrategyHint = `Budget is set at ${request.budget}. Focus on aligning your proposal with the client's preferred timezone (${request.timeZone}).`;
+  // --- FIX APPLIED HERE ---
+  // Provide a fallback of `new Date()` in case any of the request dates are null.
+  // The `||` operator means "use the value on the left, but if it's null/undefined, use the value on the right".
+  const start = new Date(request.auditStart || new Date());
+  const end = new Date(request.auditEnd || new Date());
+  const deadline = new Date(request.deadline || new Date());
+  const financialYearDate = new Date(request.financialYear || new Date());
+  // -------------------------
 
-  if (request.urgency === 'URGENT') {
-    readinessScore -= 1.5;
-    quickInsight += " The urgent nature may indicate poor prior planning or an unforeseen need.";
-    bidStrategyHint += " An expedited timeline could justify a higher bid."
+  const durationDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  if (durationDays < 30 && durationDays >= 0) { // Check for non-negative duration
+      readinessScore -= 1.0;
+      risks.push(`The estimated duration of ${durationDays} days is tight for a standard ${request.type} engagement.`);
   }
-  if (!request.notes || request.notes.length < 50) {
-    readinessScore -= 1;
-    quickInsight += " The project details are sparse, indicating a need for a thorough discovery call.";
+
+  // Analyze special flags
+  if (request.specialFlags.includes('first_audit')) {
+      readinessScore -= 1.0;
+      risks.push("This is a 'first_audit', which often uncovers foundational bookkeeping issues and can extend the project scope.");
+      strategyHints.push("Position your firm as a helpful guide. Offer advisory services for setting up best practices post-audit.");
+  }
+  if (request.specialFlags.includes('public_company')) {
+      readinessScore += 1.0; // They are likely more organized
+      insights.push("As a 'public_company', the client should have well-documented internal controls, which may streamline the process.");
   }
 
+  // Final readiness score
+  const finalReadinessScore = Math.max(2.0, Math.min(9.9, readinessScore));
 
-  const reportData: ReportData = {
+  // The FlowingAuditReport component expects a specific format, so we map our analysis to it.
+  return {
     client: {
-      name: request.title, // Using the title as the client name placeholder
-      industry: request.type, // Using the type as industry
-      natureOfBusiness: request.notes || 'No detailed business description was provided by the client.',
+        name: request.title,
+        industry: request.type,
+        natureOfBusiness: request.notes || 'No detailed business description was provided.',
     },
     engagement: {
-      period: new Date(request.financialYear).getFullYear().toString(),
-      type: `${request.type} (${request.framework})`,
-      turnover: `Budgeted at ${request.budget?.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`,
-      teamPreference: 'Not specified by client.',
+        period: financialYearDate.getFullYear().toString(),
+        type: `${request.type} (${request.framework})`,
+        turnover: formatCurrency(request.budget, 'USD'),
+        teamPreference: 'Not Specified by Client',
     },
-    documents: documents,
-    readinessScore: Math.max(2.0, readinessScore), // Ensure score doesn't go too low
-    quickInsight: quickInsight,
-    clientNotes: "This report is an AI-generated analysis based on the initial client request.",
-    deadline: new Date(request.deadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-    bidStrategyHint: bidStrategyHint,
+    documents: [ // Using the analysis to create document-like entries
+        { category: "Client Profile & Scope", provided: true, source: "AI Inference", structureClarity: { rating: 5, description: "Analyzed" } },
+        { category: "Key Dates & Timeline", provided: true, source: "AI Inference", structureClarity: { rating: 4, description: "Extracted" } },
+        { category: "Identified Risk Factors", provided: risks.length > 0, source: "AI Inference", structureClarity: { rating: 5, description: risks.length > 0 ? "Risks Found" : "No Major Risks" } },
+        { category: "Strategic Recommendations", provided: true, source: "AI Inference", structureClarity: { rating: 5, description: "Generated" } },
+    ],
+    readinessScore: finalReadinessScore,
+    quickInsight: insights.join('. ') || "Standard engagement profile. Please review risk factors for details.",
+    // We can use the clientNotes section to list the identified risks for clarity
+    clientNotes: risks.length > 0 ? risks.join('; ') : "No major risks were identified from the provided information.",
+    deadline: formatDate(deadline),
+    bidStrategyHint: strategyHints.join(' '),
   };
-
-  return reportData;
 }

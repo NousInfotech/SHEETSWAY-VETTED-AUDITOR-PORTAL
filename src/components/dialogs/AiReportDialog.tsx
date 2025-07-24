@@ -9,30 +9,24 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { FlowingAuditReport } from '@/components/ai-mock/flowing-audit-report'; // Adjust path if you placed this elsewhere
-import { ReportData } from '@/components/ai-mock/flowing-audit-report'; // Adjust path if you placed this elsewhere
+import { ReportData } from '@/components/ai-mock/flowing-audit-report';
+import { AiReportGenerator } from './AiReportGenerator'; // <-- Import the new component
 
 export interface AiReportDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  reportData: ReportData | null; // The data for the report
+  reportData: ReportData | null;
 }
 
 export function AiReportDialog({ isOpen, onClose, reportData }: AiReportDialogProps) {
-  // If the dialog isn't open or there's no data, render nothing.
   if (!isOpen || !reportData) {
     return null;
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-4xl min-h-[500px] max-h-[90vh] flex flex-col">
         
-        {/*
-          This header is visually hidden using the "sr-only" class but is
-          required for screen reader accessibility, as mandated by Radix UI.
-          It provides context to visually impaired users without affecting the layout.
-        */}
         <DialogHeader className="sr-only">
           <DialogTitle>AI-Generated Audit Readiness Report</DialogTitle>
           <DialogDescription>
@@ -40,13 +34,9 @@ export function AiReportDialog({ isOpen, onClose, reportData }: AiReportDialogPr
           </DialogDescription>
         </DialogHeader>
 
-        {/* 
-          This is the main scrollable area for the report.
-          The negative margins allow the content to bleed to the edges of the dialog content area,
-          creating a seamless, full-component look.
-        */}
         <div className="flex-grow overflow-y-auto -mx-6 -my-6">
-          <FlowingAuditReport data={reportData} />
+          {/* --- Render the generator instead of the report directly --- */}
+          <AiReportGenerator reportData={reportData} />
         </div>
 
         <DialogFooter className="pt-4 border-t">
