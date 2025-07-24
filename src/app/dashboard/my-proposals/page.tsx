@@ -155,7 +155,7 @@ export default function MyProposalsPage() {
           // THE FIX: Use .getTime() to convert dates to numbers before subtracting.
           // This sorts in descending order (newest first).
           return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
         });
         setProposals(sortedProposals)
