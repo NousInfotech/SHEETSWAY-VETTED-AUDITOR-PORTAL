@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from '@/components/ui/dialog';
 import { AuditorRegistrationForm } from '@/components/auth-register/AuditorRegistrationForm';
 import { PlusCircle, Loader2, UserX } from 'lucide-react';
@@ -21,25 +21,40 @@ import { AuditorDetailDialog } from './AuditorDetailDialog';
 
 export default function TeamsPage() {
   const { user, loading: authLoading } = useAuth();
-  
+  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
+
   // State for data fetching
   const [auditors, setAuditors] = useState<AuditorProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // State for dialogs
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
-  const [viewingAuditor, setViewingAuditor] = useState<AuditorProfile | null>(null);
-  const [editingAuditor, setEditingAuditor] = useState<AuditorProfile | null>(null);
+  const [viewingAuditor, setViewingAuditor] = useState<AuditorProfile | null>(
+    null
+  );
+  const [editingAuditor, setEditingAuditor] = useState<AuditorProfile | null>(
+    null
+  );
 
   const fetchTeamMembers = async () => {
     setIsLoading(true);
     try {
       const data = await getAllAuditors();
       if (data) {
-        setAuditors(data);
+        let myfirmAuditors = data.filter(
+          (item) => item.auditFirmId === my_profile.auditFirmId
+        );
+        const sortedAuditors = myfirmAuditors.sort((a, b) => {
+          // THE FIX: Use .getTime() to convert dates to numbers before subtracting.
+          // This sorts in descending order (newest first).
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        });
+        setAuditors(sortedAuditors);
       }
     } catch (error) {
-      toast.error("Failed to load team members.");
+      toast.error('Failed to load team members.');
     } finally {
       setIsLoading(false);
     }
@@ -56,17 +71,24 @@ export default function TeamsPage() {
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className='flex items-center justify-center py-20'>
+          <Loader2 className='text-muted-foreground h-8 w-8 animate-spin' />
         </div>
       );
     }
     if (auditors.length === 0) {
       return (
         <div className='flex flex-col items-center justify-center px-6 py-20 text-center'>
-          <UserX className='text-muted-foreground/50 mb-6 h-20 w-20' strokeWidth={1} />
-          <h3 className='text-foreground mb-2 text-xl font-semibold'>No Team Members Found</h3>
-          <p className='text-muted-foreground max-w-sm'>Click "Add Member" to build your team.</p>
+          <UserX
+            className='text-muted-foreground/50 mb-6 h-20 w-20'
+            strokeWidth={1}
+          />
+          <h3 className='text-foreground mb-2 text-xl font-semibold'>
+            No Team Members Found
+          </h3>
+          <p className='text-muted-foreground max-w-sm'>
+            Click "Add Member" to build your team.
+          </p>
         </div>
       );
     }
@@ -77,7 +99,7 @@ export default function TeamsPage() {
             key={auditor.id}
             auditor={auditor}
             onViewProfile={setViewingAuditor} // Pass the setter function directly
-            onEditProfile={setEditingAuditor}   // Pass the setter function directly
+            onEditProfile={setEditingAuditor} // Pass the setter function directly
           />
         ))}
       </div>
@@ -89,8 +111,12 @@ export default function TeamsPage() {
       <div className='container mx-auto px-4 py-12'>
         <div className='mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-center'>
           <div className='text-center md:text-left'>
-            <h1 className='text-4xl font-bold tracking-tight sm:text-5xl'>Meet Our Team</h1>
-            <p className='mt-3 max-w-2xl text-lg text-muted-foreground'>A dedicated team of world-class security professionals.</p>
+            <h1 className='text-4xl font-bold tracking-tight sm:text-5xl'>
+              Meet Our Team
+            </h1>
+            <p className='text-muted-foreground mt-3 max-w-2xl text-lg'>
+              A dedicated team of world-class security professionals.
+            </p>
           </div>
           <div className='flex-shrink-0 text-center md:text-right'>
             <Button onClick={() => setIsAddMemberDialogOpen(true)}>
@@ -103,48 +129,58 @@ export default function TeamsPage() {
       </div>
 
       {/* --- DIALOGS --- */}
-      <AuditorDetailDialog 
+      <AuditorDetailDialog
         isOpen={!!viewingAuditor}
         onClose={() => setViewingAuditor(null)}
         auditor={viewingAuditor}
       />
 
-      <Dialog open={!!editingAuditor} onOpenChange={(isOpen) => !isOpen && setEditingAuditor(null)}>
-        <DialogContent className="sm:max-w-[900px]">
+      <Dialog
+        open={!!editingAuditor}
+        onOpenChange={(isOpen) => !isOpen && setEditingAuditor(null)}
+      >
+        <DialogContent className='sm:max-w-[900px]'>
           <DialogHeader>
-            <DialogTitle className="text-2xl">Edit Auditor Profile</DialogTitle>
-            <DialogDescription>Update the profile details for {editingAuditor?.name}.</DialogDescription>
+            <DialogTitle className='text-2xl'>Edit Auditor Profile</DialogTitle>
+            <DialogDescription>
+              Update the profile details for {editingAuditor?.name}.
+            </DialogDescription>
           </DialogHeader>
-          <div className="py-4 max-h-[80vh] overflow-y-auto pr-4">
+          <div className='max-h-[80vh] overflow-y-auto py-4 pr-4'>
             {/* The AuditorRegistrationForm would need to be updated to handle editing */}
             {/* For now, we'll just show the form */}
             {editingAuditor && (
-                <AuditorRegistrationForm 
+              <AuditorRegistrationForm
                 key={editingAuditor ? editingAuditor.id : 'create'}
                 isModalMode={true}
                 auditorToEdit={editingAuditor}
                 onFormSubmit={() => {
-                    setEditingAuditor(null);
-                    fetchTeamMembers(); // Re-fetch data on success
-                }} 
-            />
+                  setEditingAuditor(null);
+                  fetchTeamMembers(); // Re-fetch data on success
+                }}
+              />
             )}
           </div>
         </DialogContent>
       </Dialog>
-      
-      <Dialog open={isAddMemberDialogOpen} onOpenChange={setIsAddMemberDialogOpen}>
-        <DialogContent className="sm:max-w-[900px]">
+
+      <Dialog
+        open={isAddMemberDialogOpen}
+        onOpenChange={setIsAddMemberDialogOpen}
+      >
+        <DialogContent className='sm:max-w-[900px]'>
           <DialogHeader>
-            <DialogTitle className="text-2xl">Add a New Auditor</DialogTitle>
-            <DialogDescription>Register a new auditor to join the firm.</DialogDescription>
+            <DialogTitle className='text-2xl'>Add a New Auditor</DialogTitle>
+            <DialogDescription>
+              Register a new auditor to join the firm.
+            </DialogDescription>
           </DialogHeader>
-          <div className="py-4 max-h-[80vh] overflow-y-auto pr-4">
-            <AuditorRegistrationForm 
+          <div className='max-h-[80vh] overflow-y-auto py-4 pr-4'>
+            <AuditorRegistrationForm
               onFormSubmit={() => {
                 setIsAddMemberDialogOpen(false);
                 fetchTeamMembers(); // Re-fetch data on success
-              }} 
+              }}
             />
           </div>
         </DialogContent>

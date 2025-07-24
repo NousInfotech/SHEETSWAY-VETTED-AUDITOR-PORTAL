@@ -141,11 +141,26 @@ export default function MyProposalsPage() {
   const [viewingProposal, setViewingProposal] = useState<Proposal | null>(null);
   const [editingProposal, setEditingProposal] = useState<Proposal | null>(null);
 
+  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
+
   const fetchProposals = async () => {
     setIsLoading(true);
     try {
       const data = await getProposals();
-      if (data) setProposals(data);
+      if (data) {
+        let myfirmProposals = data.filter(
+          (item) => item.auditFirmId === my_profile.auditFirmId
+        );
+        const sortedProposals = myfirmProposals.sort((a, b) => {
+          // THE FIX: Use .getTime() to convert dates to numbers before subtracting.
+          // This sorts in descending order (newest first).
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        });
+        setProposals(sortedProposals)
+      }
+      
     } catch (err) {
       toast.error('Failed to load proposals.');
     } finally {
