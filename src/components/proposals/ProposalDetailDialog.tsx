@@ -23,7 +23,8 @@ import {
   Trash2,
   Pencil,
   Loader2,
-  Info
+  Info,
+  Euro
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -97,7 +98,7 @@ export function ProposalDetailDialog({ proposal, isOpen, onClose, onEdit, onDele
           {/* Key Metrics Section */}
           <div className="py-4 border-t border-b">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6">
-                <InfoItem icon={DollarSign} label="Quotation" value={formatCurrency(proposal.quotation, proposal.currency)} />
+                <InfoItem icon={Euro} label="Quotation" value={formatCurrency(proposal.quotation, proposal.currency)} />
                 <InfoItem icon={CalendarDays} label="Start Date" value={formatDate(proposal.startDate)} />
                 <InfoItem icon={CalendarDays} label="End Date" value={formatDate(proposal.endDate)} />
                 <InfoItem icon={Clock} label="Est. Duration" value={`${proposal.estimatedDuration} days`} />
