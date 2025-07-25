@@ -5,7 +5,7 @@ import { getUrgencyColor, formatDate, downloadAllAttachments } from '../utils';
 // Import icons for a more visual and intuitive UI
 import {
   Bookmark,
-  DollarSign,
+  Euro,
   CalendarDays,
   Briefcase,
   Paperclip,
@@ -37,13 +37,12 @@ interface RequestsGridProps {
   isProposalSubmitted: (id: number) => boolean;
 }
 
-
 export function capitalize(str: string | null | undefined): string {
   // Guard clause: handles null, undefined, or empty strings
   if (!str) {
     return '';
   }
-  
+
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
@@ -79,8 +78,6 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   const profile = useProfileStore.getState().profile;
   const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
   const my_role = my_profile.role;
-
-  
 
   const onClose = () => {
     setIsPreviewOpen(false);
@@ -144,8 +141,8 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                   </div>
 
                   {/* Main Title */}
-                  <h3 className='text-foreground text-lg sm:text-xl'>
-                    {request.title.toUpperCase()}
+                  <h3 className='text-foreground text-lg font-bold sm:text-xl'>
+                    {capitalize(request.title)}
                   </h3>
                   <p className='text-muted-foreground mt-1 text-sm'>
                     Framework: {request.framework} • Submitted:{' '}
@@ -169,7 +166,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
               {/* --- Key Information Section with Icons --- */}
               <div className='border-border my-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-b py-4 text-sm md:grid-cols-4'>
                 <div className='text-foreground flex items-center gap-2'>
-                  <DollarSign className='text-muted-foreground h-4 w-4' />
+                  <Euro className='text-muted-foreground h-4 w-4' />
                   <span className='font-medium'>{request.budget}</span>
                 </div>
                 <div className='text-foreground flex items-center gap-2'>
@@ -287,6 +284,8 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
         );
       })}
 
+      {/* mock data */}
+
       {requests.map((request) => {
         const isBookmarked = bookmarkedRequests.includes(request.id);
         const hasSubmitted = isProposalSubmitted(request.id);
@@ -346,7 +345,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
               {/* --- Key Information Section with Icons --- */}
               <div className='border-border my-5 grid grid-cols-2 gap-x-4 gap-y-4 border-t border-b py-4 text-sm md:grid-cols-4'>
                 <div className='text-foreground flex items-center gap-2'>
-                  <DollarSign className='text-muted-foreground h-4 w-4' />
+                  <Euro className='text-muted-foreground h-4 w-4' />
                   <span className='font-medium'>{request.budget}</span>
                 </div>
                 <div className='text-foreground flex items-center gap-2'>

@@ -122,7 +122,7 @@ export function ClientRequestDetailDialog({
 
         <DialogFooter className="pt-4 border-t">
           <Button variant="outline" onClick={() => onKnowMoreFromAi(request)}>
-            KNOW More From AI
+            Generate AI Report
           </Button>
           <Button variant="outline" onClick={onClose}>Close</Button>
           <Button className='hidden' onClick={() => handleSubmitProposal(request)}>
