@@ -77,7 +77,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   const [isSubmitModelOpen, setIsSubmitModelOpen] = useState(false);
   const profile = useProfileStore.getState().profile;
   const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
-  const my_role = my_profile.role;
+  const my_role = my_profile?.role;
 
   const onClose = () => {
     setIsPreviewOpen(false);
@@ -284,7 +284,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                     }}
                     disabled={
                       hasSubmitted ||
-                      ['JUNIOR', 'SENIOR'].includes(my_profile.role)
+                      ['JUNIOR', 'SENIOR'].includes(my_profile?.role)
                     }
                     className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-800 sm:flex-none ${
                       hasSubmitted
