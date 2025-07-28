@@ -295,7 +295,7 @@ const AccountingDataTab: React.FC<AccountingDataTabProps> = ({ data }) => {
               {trialBalance.map(([type, balance]) => (
                 <tr key={type} className="hover:bg-muted dark:hover:bg-card/80">
                   <td className="px-6 py-4 text-sm text-foreground bg-background border-b border-border">{type}</td>
-                  <td className="px-6 py-4 text-sm text-right text-foreground bg-background border-b border-border">${balance.toLocaleString()}</td>
+                  <td className="px-6 py-4 text-sm text-right text-foreground bg-background border-b border-border">€{balance.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

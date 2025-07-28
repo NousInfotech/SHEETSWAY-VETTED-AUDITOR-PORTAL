@@ -205,6 +205,28 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                   <h4 className='text-foreground mb-3 font-semibold'>
                     Attachments
                   </h4>
+                  {/* <div className='flex flex-col gap-2'>
+                    <div className='flex flex-wrap gap-2'>
+                      {request.documents.length > 0 && request.documents.map((document:any, index:number) => (
+                        <div
+                          key={index}
+                          className='bg-muted/70 text-muted-foreground flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm font-medium'
+                        >
+                          <File size={14} className='flex-shrink-0' />
+                          <span className='truncate'><a href={document.fileUrl} target="_blank">{document.fileName}</a></span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() =>
+                        downloadAllAttachments(request.documents)
+                      }
+                      className='text-primary hover:bg-primary/10 mt-2 inline-flex items-center gap-2 self-start rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium transition-colors'
+                    >
+                      <Download size={14} />
+                      Download All
+                    </button>
+                  </div> */}
                 </div>
               )}
 

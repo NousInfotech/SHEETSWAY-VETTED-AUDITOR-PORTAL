@@ -85,7 +85,9 @@ export function CreateProposalForm({
 }: ProposalFormProps) {
   const { user } = useAuth();
   const router = useRouter();
-  const profile = useProfileStore((state) => state.profile);
+  
+  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isEditMode = !!proposalToEdit;
@@ -139,7 +141,7 @@ export function CreateProposalForm({
   const selectedCurrency = form.watch('currency');
 
   async function onSubmit(data: FormValues) {
-    if (!user || !profile) {
+    if (!user || !my_profile) {
       toast.error('Authentication Error', {
         description: 'Your profile is not loaded. Please try again.'
       });
@@ -164,8 +166,9 @@ export function CreateProposalForm({
         await updateProposal(proposalToEdit.id, payload);
         toast.success('Proposal updated successfully!');
       } else {
-        const resolvedAuditorId = auditorId ?? profile.id;
-        const resolvedAuditFirmId = auditFirmId ?? profile.auditFirmId;
+        const resolvedAuditorId = auditorId ?? my_profile.id;
+        const resolvedAuditFirmId = auditFirmId ?? my_profile.auditFirmId;
+        
         if (!clientRequestId || !resolvedAuditorId || !resolvedAuditFirmId) {
           throw new Error(
             'Missing Client Request ID, Auditor ID, or Firm ID. Cannot create proposal.'
