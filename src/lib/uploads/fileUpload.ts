@@ -9,7 +9,7 @@ export async function uploadSingleFile(
   folderName: string
 ): Promise<{ fileKey: string; fileUrl: string }> {
   // 1. Get a pre-signed URL from your server
-  const { data } = await axiosInstance.post('/api/upload/single', {
+  const { data } = await axiosInstance.post('/api/v1/upload/single', {
     fileName: file.name,
     contentType: file.type,
     folder: folderName,
@@ -49,7 +49,7 @@ export async function uploadMultipleFiles(
     uploadUrl: string;
     fileKey: string;
     fileUrl: string;
-  }[]>('/api/upload/multiple', { files: payload });
+  }[]>('/api/v1/upload/multiple', { files: payload });
 
   // 2. Upload each file to its corresponding pre-signed URL in parallel
   await Promise.all(
@@ -72,7 +72,7 @@ export async function uploadMultipleFiles(
 
 
 export async function getAccessUrlForFile(fileKey: string): Promise<string> {
-  const { data } = await axiosInstance.post('/api/upload/access/single', {
+  const { data } = await axiosInstance.post('/api/v1/upload/access/single', {
     fileKey,
   });
   return data.accessUrl;
@@ -83,7 +83,7 @@ export async function getAccessUrlForFile(fileKey: string): Promise<string> {
 // getAccessUrlsForFiles with Axios
 
 export async function getAccessUrlsForFiles(fileKeys: string[]): Promise<string[]> {
-  const { data } = await axiosInstance.post('/api/upload/access/multiple', {
+  const { data } = await axiosInstance.post('/api/v1/upload/access/multiple', {
     fileKeys,
   });
   return data.accessUrls;

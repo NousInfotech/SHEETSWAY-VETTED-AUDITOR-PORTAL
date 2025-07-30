@@ -77,7 +77,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   const [isSubmitModelOpen, setIsSubmitModelOpen] = useState(false);
   const profile = useProfileStore.getState().profile;
   const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
-  const my_role = my_profile?.role;
+  
 
   const onClose = () => {
     setIsPreviewOpen(false);
@@ -200,24 +200,35 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                 </p>
               </div>
 
-              {request.specialFlags.length > 0 && (
-                <div className='mt-5'>
-                  <h4 className='text-foreground mb-3 font-semibold'>
-                    Attachments
-                  </h4>
-                  {/* <div className='flex flex-col gap-2'>
-                    <div className='flex flex-wrap gap-2'>
-                      {request.documents.length > 0 && request.documents.map((document:any, index:number) => (
-                        <div
-                          key={index}
-                          className='bg-muted/70 text-muted-foreground flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm font-medium'
-                        >
-                          <File size={14} className='flex-shrink-0' />
-                          <span className='truncate'><a href={document.fileUrl} target="_blank">{document.fileName}</a></span>
-                        </div>
-                      ))}
-                    </div>
-                    <button
+              <div className='mt-5'>
+                <h4 className='text-foreground mb-3 font-semibold'>
+                  Attachments
+                </h4>
+                <div className='flex flex-col gap-2'>
+                  <div className='flex flex-wrap gap-2'>
+                    {request.documents.filter(
+                      (doc: any) => doc.requestId === request.id
+                    ).length > 0 &&
+                      request.documents
+                        .filter(
+                          (doc: any, index: number) =>
+                            doc.requestId === request.id
+                        )
+                        .map((document: any, index: number) => (
+                          <div
+                            key={index}
+                            className='bg-muted/70 text-muted-foreground flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm font-medium'
+                          >
+                            <File size={14} className='flex-shrink-0' />
+                            <span className='truncate'>
+                              <a href={document.fileUrl} target='_blank'>
+                                {document.fileName}
+                              </a>
+                            </span>
+                          </div>
+                        ))}
+                  </div>
+                  {/* <button
                       onClick={() =>
                         downloadAllAttachments(request.documents)
                       }
@@ -225,10 +236,9 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                     >
                       <Download size={14} />
                       Download All
-                    </button>
-                  </div> */}
+                    </button> */}
                 </div>
-              )}
+              </div>
 
               {/* --- Card Footer: Client Info & Actions --- */}
               <div className='border-border mt-5 flex flex-col items-start justify-between gap-4 border-t pt-5 sm:flex-row sm:items-center'>
@@ -414,7 +424,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                         </div>
                       ))}
                     </div>
-                    <button
+                    {/* <button
                       onClick={() =>
                         downloadAllAttachments(request.attachments)
                       }
@@ -422,7 +432,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                     >
                       <Download size={14} />
                       Download All
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               )}
@@ -478,7 +488,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                     }}
                     disabled={
                       hasSubmitted ||
-                      ['JUNIOR', 'SENIOR'].includes(my_profile.role)
+                      ['JUNIOR', 'SENIOR'].includes(my_profile?.role)
                     }
                     className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:bg-gray-400 disabled:text-gray-800 sm:flex-none ${
                       hasSubmitted
