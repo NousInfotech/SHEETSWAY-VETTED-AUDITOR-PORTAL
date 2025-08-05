@@ -100,7 +100,8 @@ export default async function RootLayout({
           fontVariables
         )}
       >
-        <ThemeScript /> {/* Flicker-prevention script */}
+        {/* Flicker-prevention script */}
+        {/* <ThemeScript />  */}
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
           <ThemeProvider
