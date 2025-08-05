@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import DashboardClientLayout from './DashboardClientLayout';
 
 export const metadata: Metadata = {
-  title: 'Sheetsway Dashboard',
+  title: 'Dashboard',
   description: 'Sheetsway provides excellent auditing Services'
 };
 

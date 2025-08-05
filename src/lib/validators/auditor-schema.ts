@@ -22,13 +22,14 @@ export enum VettedStatus {
 }
 
 export enum Currency {
-  USD = "USD",
   EUR = "EUR",
+  USD = "USD",
   GBP = "GBP",
   INR = "INR",
   AED = "AED",
   OTHER = "OTHER",
 }
+
 
 // The main Zod schema for the form, including auth fields for creation
 export const AuditorFormSchema = z.object({

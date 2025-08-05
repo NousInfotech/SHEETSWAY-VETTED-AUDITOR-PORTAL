@@ -6,7 +6,8 @@ export interface NavItem {
   disabled?: boolean;
   external?: boolean;
   shortcut?: [string, string];
-  icon?: keyof typeof Icons;
+  icon?: string; // CHANGED from keyof typeof Icons
+  activeIcon?: string; // CHANGED from keyof typeof Icons
   label?: string;
   description?: string;
   isActive?: boolean;

@@ -27,7 +27,8 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarRail
+  SidebarRail,
+  useSidebar
 } from '@/components/ui/sidebar';
 import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { navItems } from '@/constants/data';
@@ -51,6 +52,10 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '../ui/button';
 import { StaticOrgDisplay } from '../static-org-display';
+import { cn } from '@/lib/utils';
+import { Search } from 'lucide-react';
+import { Input } from '../ui/input';
+import { Separator } from '../ui/separator';
 export const company = {
   name: 'Acme Inc',
   logo: IconPhotoUp,
@@ -64,6 +69,7 @@ const tenants = [
 ];
 
 export default function AppSidebar() {
+  const { state } = useSidebar();
   const pathname = usePathname();
   const { isOpen } = useMediaQuery();
   const router = useRouter();
@@ -77,6 +83,9 @@ export default function AppSidebar() {
 
   const activeTenant = tenants[0];
 
+  const activeStyles =
+    'data-[active=true]:bg-amber-500 data-[active=true]:text-white data-[active=true]:hover:bg-amber-600 data-[active=true]:hover:text-white';
+
   React.useEffect(() => {
     // Side effects based on sidebar state changes
   }, [isOpen]);
@@ -84,65 +93,126 @@ export default function AppSidebar() {
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader>
-        <StaticOrgDisplay app='Audit Marketplace' name='Sheetsway' />
+        {/* <StaticOrgDisplay app='Audit Market Place' name='Sheetsway' /> */}
+        {state === 'expanded' ? (
+          <div className='mx-auto w-[95%]'>
+            <img src='/assets/sheetswaylogo.png' alt='logo' />
+          </div>
+        ) : (
+          <div>
+            <img
+              src='/favicon/favicon.svg'
+              alt='logo'
+              className='mx-auto h-6 w-6'
+            />
+          </div>
+        )}
+        {state === 'expanded' ? (
+          <>
+            <div className='relative mx-auto my-2 w-[95%]'>
+              <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+              <Input placeholder='search ...' className='pl-10' />
+            </div>
+          </>
+        ) : (
+          <div className='flex justify-center'>
+            <Search className='h-4 w-4' />
+          </div>
+        )}
+        <div className='flex w-full justify-center'>
+          <Separator className='!w-[95%]' />
+        </div>
       </SidebarHeader>
       <SidebarContent className='overflow-x-hidden'>
         <SidebarGroup>
-          <SidebarGroupLabel>Overview</SidebarGroupLabel>
+          {/* <SidebarGroupLabel>Overview</SidebarGroupLabel> */}
           <SidebarMenu>
             {navItems.map((item) => {
-              const Icon = item.icon ? Icons[item.icon] : Icons.logo;
-              return item?.items && item?.items?.length > 0 ? (
-                <Collapsible
-                  key={item.title}
-                  asChild
-                  defaultOpen={item.isActive}
-                  className='group/collapsible'
-                >
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip={item.title}
-                        isActive={pathname === item.url}
-                        className={
-                          my_profile.role === 'JUNIOR' &&
-                          item.title === 'Messaging & Meetings'
-                            ? 'bg-muted text-muted-foreground cursor-not-allowed' // Using common disabled classes
-                            : '' // Provide an empty string for the "else" case
-                        }
-                      >
-                        {item.icon && <Icon />}
-                        <span>{item.title}</span>
-                        <IconChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {item.items?.map((subItem) => (
-                          <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton
-                              asChild
-                              isActive={pathname === subItem.url}
-                            >
-                              <Link href={subItem.url}>
-                                <span>{subItem.title}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-              ) : (
+              // We'll handle both collapsible and direct links
+              const isParentActive =
+                item.items && item.items.length > 0
+                  ? item.items.some((subItem) => pathname === subItem.url)
+                  : false;
+              const isDirectlyActive = pathname === item.url;
+              const isActive = isParentActive || isDirectlyActive;
+
+              let iconElement = null;
+
+              // 1. Choose the correct icon path (active or default)
+              const iconPath =
+                isActive && item.activeIcon ? item.activeIcon : item.icon;
+
+              // 2. If a path exists, create an <img> element
+              const activeIconFilter = 'brightness-0 invert';
+              if (iconPath) {
+                iconElement = (
+                  <img
+                    src={iconPath}
+                    alt={`${item.title} icon`}
+                    className={cn(
+                      'h-5 w-5 transition-all duration-200 dark:brightness-0 dark:invert', // Base styles
+                      isActive && activeIconFilter
+                    )}
+                  />
+                );
+              }
+
+              if (!iconElement) return null; // Don't render if there's no icon
+
+              // Render collapsible menu if it has items
+              if (item.items && item.items.length > 0) {
+                return (
+                  <Collapsible
+                    key={item.title}
+                    asChild
+                    defaultOpen={isParentActive}
+                    className='group/collapsible'
+                  >
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton
+                          tooltip={item.title}
+                          isActive={isParentActive}
+                          className={activeStyles}
+                        >
+                          {iconElement}
+                          <span>{item.title}</span>
+                          <IconChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      {/*  sub-menu-items below if needed */}
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {item.items?.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.title}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={pathname === subItem.url}
+                              >
+                                <Link href={subItem.url}>
+                                  <span>{subItem.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                );
+              }
+
+              // Render a regular menu item
+              return (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     tooltip={item.title}
-                    isActive={pathname === item.url}
+                    isActive={isDirectlyActive}
+                    className={activeStyles}
                   >
                     <Link href={item.url}>
-                      <Icon />
+                      {iconElement} {/* Render the chosen icon element */}
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>

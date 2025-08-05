@@ -16,7 +16,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Dashboard',
     url: '/dashboard/overview',
-    icon: 'dashboard',
+    icon: '/assets/icons/dashboard.png',
+    activeIcon: '/assets/icons/dashboard-filled.png',
     isActive: false,
     shortcut: ['d', 'd'],
     items: []
@@ -24,7 +25,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Engagement Requests',
     url: '/dashboard/request',
-    icon: 'request',
+    icon: '/assets/icons/report.png',
+    activeIcon: '/assets/icons/report-filled.png',
     isActive: false,
     shortcut: ['r', 'r'],
     items: []
@@ -32,7 +34,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Proposals',
     url: '/dashboard/my-proposals',
-    icon: 'proposalIcon',
+    icon: '/assets/icons/new-file.png',
+    activeIcon: '/assets/icons/new-file-filled.png',
     isActive: false,
     shortcut: ['p', 'p'],
     items: []
@@ -40,7 +43,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Active Engagements',
     url: '/dashboard/engagements',
-    icon: 'engagements',
+    icon: '/assets/icons/briefcase.png',
+    activeIcon: '/assets/icons/briefcase-filled.png',
     isActive: false,
     shortcut: ['e', 'e'],
     items: []
@@ -48,7 +52,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Messaging & Meetings',
     url: '/dashboard/connect',
-    icon: 'connect',
+    icon: '/assets/icons/chat-bubble.png',
+    activeIcon: '/assets/icons/chat-bubble-filled.png',
     shortcut: ['c', 'c'],
     isActive: false,
     items: []
@@ -56,7 +61,8 @@ export const navItems: NavItem[] = [
   {
     title: 'Profile & Compliance',
     url: '/dashboard/profile',
-    icon: 'user',
+    icon: '/assets/icons/user.png',
+    activeIcon: '/assets/icons/user-filled.png',
     isActive: false,
     shortcut: ['c', 'c'],
     items: []
@@ -64,35 +70,13 @@ export const navItems: NavItem[] = [
   {
     title: 'Teams',
     url: '/dashboard/teams',
-    icon: 'users',
+    icon: '/assets/icons/users.png',
+    activeIcon: '/assets/icons/users-filled.png',
     isActive: false,
     shortcut: ['t', 't'],
     items: []
   },
-  // {
-  //   title: 'Proposals',
-  //   url: '/dashboard/proposals',
-  //   icon: 'proposals',
-  //   isActive: false,
-  //   shortcut: ['p', 'p'],
-  //   items: []
-  // },
-  // {
-  //   title: 'Payments',
-  //   url: '/dashboard/payments',
-  //   icon: 'payments',
-  //   isActive: false,
-  //   shortcut: ['y', 'y'],
-  //   items: []
-  // },
-  // {
-  //   title: 'History',
-  //   url: '/dashboard/history',
-  //   icon: 'history',
-  //   isActive: false,
-  //   shortcut: ['h', 'h'],
-  //   items: []
-  // }
+  
 ];
 
 
