@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+
 import {
   Folder,
   File as FileIcon,
@@ -55,6 +56,7 @@ type FileData = {
   size: string;
   creationDate: string;
   directory: string;
+  file: File;
 };
 type Subfolder = { id: string; name: string; files: FileData[] };
 type LibraryData = { id: string; name: string; subfolders: Subfolder[] };
@@ -98,13 +100,19 @@ const createInitialData = (): LibraryData[] => [
       {
         id: crypto.randomUUID(),
         name: 'PPE',
-        files: Array.from({ length: 7 }, (_, i) => ({
-          id: `ppe-file-${i + 1}`,
-          name: 'Engagement Letter.pdf',
-          size: '10.28 KB',
-          creationDate: '29th Feb 2024 10:02 AM',
-          directory: 'Audit Procedures/PPE'
-        }))
+        files: Array.from({ length: 7 }, (_, i) => {
+          const mockFile = new File(['mock content'], 'Engagement Letter.pdf', {
+            type: 'application/pdf'
+          });
+          return {
+            id: `ppe-file-${i + 1}`,
+            name: 'Engagement Letter.pdf',
+            size: '10.28 KB',
+            creationDate: '29th Feb 2024 10:02 AM',
+            directory: 'Audit Procedures/PPE',
+            file: mockFile
+          };
+        })
       },
       { id: crypto.randomUUID(), name: 'Revenue', files: [] }
     ]
@@ -467,6 +475,7 @@ type FileListViewProps = {
   handleDeleteFiles: () => void;
   handleInitiateUpload: () => void;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleOpenFileInNewTab: (file: File) => void;
   setFileSearchTerm: (term: string) => void;
 };
 const FileListView: React.FC<FileListViewProps> = ({
@@ -481,6 +490,7 @@ const FileListView: React.FC<FileListViewProps> = ({
   handleDeleteFiles,
   handleInitiateUpload,
   handleFileUpload,
+  handleOpenFileInNewTab,
   setFileSearchTerm
 }) => (
   <section aria-labelledby='files-heading'>
@@ -585,6 +595,7 @@ const FileListView: React.FC<FileListViewProps> = ({
                       variant='ghost'
                       size='icon'
                       aria-label={`Open ${file.name} in new tab`}
+                      onClick={() => handleOpenFileInNewTab(file.file)}
                     >
                       <ExternalLink className='h-5 w-5' />
                     </Button>
@@ -796,7 +807,8 @@ export default function FilesandDocuments() {
         dateStyle: 'medium',
         timeStyle: 'short'
       }).format(file.lastModified),
-      directory: `${selectedLibrary.name}/${selectedSubfolder.name}`
+      directory: `${selectedLibrary.name}/${selectedSubfolder.name}`,
+      file: file
     }));
 
     setLibraries((prev) =>
@@ -818,6 +830,17 @@ export default function FilesandDocuments() {
     );
 
     if (e.target) e.target.value = '';
+  };
+
+  const handleOpenFileInNewTab = (file: File) => {
+    // 1. Create the temporary URL for the file content
+    const url = URL.createObjectURL(file);
+
+    // 2. Build the full path for the new tab, including encoded query parameters
+    const viewerUrl = `/view-document?fileUrl=${encodeURIComponent(url)}&fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`;
+
+    // 3. Open the new tab using the browser's API
+    window.open(viewerUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleRename = (newName: string) => {
@@ -1046,6 +1069,7 @@ export default function FilesandDocuments() {
     handleDeleteFiles,
     handleInitiateUpload,
     handleFileUpload,
+    handleOpenFileInNewTab,
     setFileSearchTerm
   };
 

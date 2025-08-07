@@ -98,7 +98,7 @@ export function CreateProposalForm({
       proposalName: '',
       description: '',
       quotation: '' as any,
-      currency: Currency.USD,
+      currency: Currency.EUR,
       estimatedDuration: '' as any,
       requestNote: '',
       dateRange: { from: undefined, to: undefined },
