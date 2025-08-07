@@ -100,7 +100,7 @@ const createInitialData = (): LibraryData[] => [
       {
         id: crypto.randomUUID(),
         name: 'PPE',
-        files: Array.from({ length: 7 }, (_, i) => {
+        files: Array.from({ length: 3 }, (_, i) => {
           const mockFile = new File(['mock content'], 'Engagement Letter.pdf', {
             type: 'application/pdf'
           });
