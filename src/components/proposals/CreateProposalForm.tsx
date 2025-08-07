@@ -5,7 +5,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 import {
   ProposalFormSchema,
   Currency
@@ -85,7 +85,7 @@ export function CreateProposalForm({
 }: ProposalFormProps) {
   const { user } = useAuth();
   const router = useRouter();
-  
+
   const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -107,6 +107,25 @@ export function CreateProposalForm({
     },
     mode: 'onChange'
   });
+
+  const dateRange = form.watch('dateRange');
+
+  useEffect(() => {
+    const { from, to } = dateRange;
+
+    // Only proceed if both a start and end date have been selected.
+    if (from && to) {
+      // Calculate the difference in calendar days. We add 1 to make the
+      // range inclusive (e.g., Aug 1 to Aug 3 is 3 days, not 2).
+      const duration = differenceInCalendarDays(to, from) + 1;
+
+      // Ensure the duration is not negative.
+      if (duration >= 0) {
+        form.setValue('estimatedDuration', duration, { shouldValidate: true });
+      }
+    }
+  }, [dateRange, form.setValue]);
+  
 
   useEffect(() => {
     if (isEditMode && proposalToEdit) {
@@ -168,7 +187,7 @@ export function CreateProposalForm({
       } else {
         const resolvedAuditorId = auditorId ?? my_profile.id;
         const resolvedAuditFirmId = auditFirmId ?? my_profile.auditFirmId;
-        
+
         if (!clientRequestId || !resolvedAuditorId || !resolvedAuditFirmId) {
           throw new Error(
             'Missing Client Request ID, Auditor ID, or Firm ID. Cannot create proposal.'
