@@ -476,6 +476,7 @@ type FileListViewProps = {
   handleInitiateUpload: () => void;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleOpenFileInNewTab: (file: File) => void;
+  handleDownloadFile: (file: File) => void;
   setFileSearchTerm: (term: string) => void;
 };
 const FileListView: React.FC<FileListViewProps> = ({
@@ -491,6 +492,7 @@ const FileListView: React.FC<FileListViewProps> = ({
   handleInitiateUpload,
   handleFileUpload,
   handleOpenFileInNewTab,
+  handleDownloadFile,
   setFileSearchTerm
 }) => (
   <section aria-labelledby='files-heading'>
@@ -588,6 +590,7 @@ const FileListView: React.FC<FileListViewProps> = ({
                       variant='ghost'
                       size='icon'
                       aria-label={`Download ${file.name}`}
+                      onClick={() => handleDownloadFile(file.file)}
                     >
                       <Download className='h-5 w-5' />
                     </Button>
@@ -832,16 +835,33 @@ export default function FilesandDocuments() {
     if (e.target) e.target.value = '';
   };
 
+
+
   const handleOpenFileInNewTab = (file: File) => {
-    // 1. Create the temporary URL for the file content
     const url = URL.createObjectURL(file);
 
-    // 2. Build the full path for the new tab, including encoded query parameters
     const viewerUrl = `/view-document?fileUrl=${encodeURIComponent(url)}&fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type)}`;
 
-    // 3. Open the new tab using the browser's API
     window.open(viewerUrl, '_blank', 'noopener,noreferrer');
   };
+
+
+  const handleDownloadFile = (file: File) => {
+    const url = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = url;
+
+    link.setAttribute('download', file.name);
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
+
+
 
   const handleRename = (newName: string) => {
     if (!renamingInfo || !newName.trim()) {
@@ -1070,6 +1090,7 @@ export default function FilesandDocuments() {
     handleInitiateUpload,
     handleFileUpload,
     handleOpenFileInNewTab,
+    handleDownloadFile,
     setFileSearchTerm
   };
 
