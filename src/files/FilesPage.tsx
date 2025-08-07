@@ -67,7 +67,9 @@ const createInitialData = (): LibraryData[] => [
     name: '1. Planning',
     subfolders: [
       { id: crypto.randomUUID(), name: 'Engagement Letter', files: [] },
-      { id: crypto.randomUUID(), name: 'Risk Assessment', files: [] }
+      { id: crypto.randomUUID(), name: 'Materiality Assessment', files: [] },
+      { id: crypto.randomUUID(), name: 'Risk Assessment', files: [] },
+      { id: crypto.randomUUID(), name: 'Team Planning Docs', files: [] }
     ]
   },
   {
@@ -75,13 +77,17 @@ const createInitialData = (): LibraryData[] => [
     name: '2. Trial Balance',
     subfolders: [
       { id: crypto.randomUUID(), name: 'TB Excel', files: [] },
+      { id: crypto.randomUUID(), name: 'Mapping File', files: [] },
       { id: crypto.randomUUID(), name: 'Adjustments', files: [] }
     ]
   },
   {
     id: crypto.randomUUID(),
     name: '3. General Ledger',
-    subfolders: [{ id: crypto.randomUUID(), name: 'Full GL', files: [] }]
+    subfolders: [
+      { id: crypto.randomUUID(), name: 'Full GL', files: [] },
+      { id: crypto.randomUUID(), name: 'Monthly Breakdown', files: [] }
+    ]
   },
   {
     id: crypto.randomUUID(),
@@ -97,6 +103,8 @@ const createInitialData = (): LibraryData[] => [
     subfolders: [
       { id: crypto.randomUUID(), name: 'Cash and Bank', files: [] },
       { id: crypto.randomUUID(), name: 'Receivables', files: [] },
+      { id: crypto.randomUUID(), name: 'Payables', files: [] },
+      { id: crypto.randomUUID(), name: 'Inventory', files: [] },
       {
         id: crypto.randomUUID(),
         name: 'PPE',
@@ -114,21 +122,35 @@ const createInitialData = (): LibraryData[] => [
           };
         })
       },
-      { id: crypto.randomUUID(), name: 'Revenue', files: [] }
+      { id: crypto.randomUUID(), name: 'Revenue', files: [] },
+      { id: crypto.randomUUID(), name: 'Expenses', files: [] },
+      { id: crypto.randomUUID(), name: 'Others', files: [] }
     ]
   },
   {
     id: crypto.randomUUID(),
     name: '6. Audit Letters & Confirmations',
     subfolders: [
-      { id: crypto.randomUUID(), name: 'Bank Confirmations', files: [] }
+      { id: crypto.randomUUID(), name: 'Bank Confirmations', files: [] },
+      { id: crypto.randomUUID(), name: 'Legal Letters', files: [] },
+      { id: crypto.randomUUID(), name: 'Management Rep Letter', files: [] }
     ]
   },
   {
     id: crypto.randomUUID(),
     name: '7. Final Deliverables',
     subfolders: [
-      { id: crypto.randomUUID(), name: 'Signed Financials', files: [] }
+      { id: crypto.randomUUID(), name: 'Signed Financials', files: [] },
+      { id: crypto.randomUUID(), name: 'Signed Audit Report', files: [] },
+      { id: crypto.randomUUID(), name: 'Final Management Letter', files: [] }
+    ]
+  },
+  {
+    id: crypto.randomUUID(),
+    name: '8. Admin / Billing',
+    subfolders: [
+      { id: crypto.randomUUID(), name: 'Invoices', files: [] },
+      { id: crypto.randomUUID(), name: 'Engagement Notes', files: [] }
     ]
   }
 ];
@@ -629,7 +651,7 @@ export default function FilesandDocuments() {
     libraries[4].id
   );
   const [selectedSubfolderId, setSelectedSubfolderId] = useState<string | null>(
-    libraries[4].subfolders[2].id
+    libraries[4].subfolders[4].id
   );
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [folderSearchTerm, setFolderSearchTerm] = useState('');
@@ -835,8 +857,6 @@ export default function FilesandDocuments() {
     if (e.target) e.target.value = '';
   };
 
-
-
   const handleOpenFileInNewTab = (file: File) => {
     const url = URL.createObjectURL(file);
 
@@ -844,7 +864,6 @@ export default function FilesandDocuments() {
 
     window.open(viewerUrl, '_blank', 'noopener,noreferrer');
   };
-
 
   const handleDownloadFile = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -860,8 +879,6 @@ export default function FilesandDocuments() {
 
     URL.revokeObjectURL(url);
   };
-
-
 
   const handleRename = (newName: string) => {
     if (!renamingInfo || !newName.trim()) {
