@@ -61,12 +61,12 @@ export default function TeamsPage() {
   };
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && my_profile) {
       fetchTeamMembers();
-    } else if (!authLoading && !user) {
+    } else if (!authLoading && !my_profile) {
       setIsLoading(false);
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, my_profile]);
 
   const renderContent = () => {
     if (isLoading) {

@@ -160,7 +160,7 @@ export function CreateProposalForm({
   const selectedCurrency = form.watch('currency');
 
   async function onSubmit(data: FormValues) {
-    if (!user || !my_profile) {
+    if (!user && !my_profile) {
       toast.error('Authentication Error', {
         description: 'Your profile is not loaded. Please try again.'
       });

@@ -6,7 +6,10 @@ import { useEngagementRequests } from '../hooks/useEngagementRequests';
 import PreviewModal from './PreviewModal';
 import ProposalModal from './ProposalModal';
 import SearchAndFilter from './SearchAndFilter';
-import { ClientRequest, getClientRequests } from '@/lib/services/clientRequestService';
+import {
+  ClientRequest,
+  getClientRequests
+} from '@/lib/services/clientRequestService';
 import { useAuth } from '@/components/layout/providers';
 import { toast } from 'sonner';
 
@@ -34,50 +37,47 @@ const EngagementRequestsPage: React.FC = () => {
     mockRequests
   } = useEngagementRequests();
 
-
   const { user, loading: authLoading } = useAuth();
-  
-    const [clientRequests, setClientRequests] = useState<ClientRequest[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
 
-
+  const [clientRequests, setClientRequests] = useState<ClientRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-      const fetchClientRequests = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const data = await getClientRequests();
-          if (data) {
-            const sortedRequests = data.sort((a, b) => {
-          // THE FIX: Use .getTime() to convert dates to numbers before subtracting.
-          // This sorts in descending order (newest first).
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        });
-            setClientRequests(sortedRequests);
-          } else {
-            setError('Failed to fetch proposals.');
-            toast.error('Could not load proposals.');
-          }
-        } catch (err) {
-          setError('An error occurred while fetching data.');
-          toast.error('Failed to load proposals.');
-        } finally {
-          setIsLoading(false);
+    const fetchClientRequests = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await getClientRequests();
+        if (data) {
+          const sortedRequests = data.sort((a, b) => {
+            // THE FIX: Use .getTime() to convert dates to numbers before subtracting.
+            // This sorts in descending order (newest first).
+            return (
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          });
+          setClientRequests(sortedRequests);
+        } else {
+          setError('Failed to fetch proposals.');
+          toast.error('Could not load proposals.');
         }
-      };
-  
-      if (!authLoading && user) {
-        fetchClientRequests();
-      } else if (!authLoading && !user) {
+      } catch (err) {
+        setError('An error occurred while fetching data.');
+        toast.error('Failed to load proposals.');
+      } finally {
         setIsLoading(false);
-        setError('You must be logged in to view proposals.');
       }
-    }, [user, authLoading]);
+    };
 
+    if (!authLoading && my_profile) {
+      fetchClientRequests();
+    } else if (!authLoading && !my_profile) {
+      setIsLoading(false);
+      setError('You must be logged in to view proposals.');
+    }
+  }, [user, authLoading, my_profile]);
 
   return (
     <div className='flex w-full flex-col'>

@@ -62,13 +62,7 @@
 //   );
 // }
 
-
-
-
 // #############################################################################################################
-
-
-
 
 // 'use client';
 
@@ -124,7 +118,7 @@
 //           // Clear the profile data from the Zustand store
 //           clearProfile();
 //         }
-        
+
 //         // Mark authentication as complete
 //         setLoading(false);
 //       }
@@ -164,10 +158,7 @@
 //   );
 // }
 
-
-
 // #################################################################################################
-
 
 'use client';
 
@@ -208,22 +199,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (firebaseUser) {
           // USER IS SIGNED IN
           setUser(firebaseUser);
-          try {
-            // Fetch their backend profile.
-            // The axios interceptor will handle the token and active-role.
-            // await fetchProfile();
-          } catch (error) {
-            // console.error("Failed to fetch profile after login:", error);
-            // If fetching fails, clear any old data
-            // clearProfile();
-          }
         } else {
           // USER IS SIGNED OUT
           setUser(null);
           // Clear the profile data from the Zustand store
           // clearProfile();
         }
-        
+
         // Mark authentication as complete
         setLoading(false);
       }
