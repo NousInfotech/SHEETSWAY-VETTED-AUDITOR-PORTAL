@@ -148,10 +148,10 @@ export async function updateAuditor(
 ): Promise<AuditorProfile> {
   const apiEndpoint = `/api/v1/auditors/profile`;
   try {
-    const response = await api.put<ApiResponse<AuditorProfile>>(
-      apiEndpoint,
-      { ...payload, id: auditorId }
-    );
+    const response = await api.put<ApiResponse<AuditorProfile>>(apiEndpoint, {
+      ...payload,
+      id: auditorId
+    });
     if (response.data && response.data.success) {
       return response.data.data;
     } else {

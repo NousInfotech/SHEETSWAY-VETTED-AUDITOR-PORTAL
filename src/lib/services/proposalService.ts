@@ -42,7 +42,6 @@ export type UpdateProposalPayload = Partial<
   Omit<CreateProposalPayload, 'clientRequestId' | 'auditorId' | 'auditFirmId'>
 >;
 
-
 interface ProposalsApiResponse {
   success: boolean;
   statusCode: number;
@@ -56,7 +55,6 @@ interface CreateProposalApiResponse {
   message: string;
   data: Proposal;
 }
-
 
 interface ApiResponse<T> {
   success: boolean;
@@ -95,10 +93,7 @@ export async function createProposal(
 
     const response = await api.post<CreateProposalApiResponse>(
       apiEndpoint,
-      proposalData,
-      {
-        activeRole: 'AUDITOR'
-      }
+      proposalData
     );
 
     if (response.data && response.data.success) {
@@ -115,25 +110,28 @@ export async function createProposal(
   }
 }
 
-
-
-
-export async function updateProposal(proposalId: string, proposalData: UpdateProposalPayload): Promise<Proposal> {
+export async function updateProposal(
+  proposalId: string,
+  proposalData: UpdateProposalPayload
+): Promise<Proposal> {
   const apiEndpoint = `/api/v1/proposals/${proposalId}`;
-  
+
   try {
     console.log(`Updating proposal ${proposalId} with payload:`, proposalData);
-    
+
     // PATCH is the standard HTTP method for partial updates.
-    const response = await api.put<ApiResponse<Proposal>>(apiEndpoint, proposalData, {
-      activeRole: 'AUDITOR'
-    });
-    
+    const response = await api.put<ApiResponse<Proposal>>(
+      apiEndpoint,
+      proposalData
+    );
+
     if (response.data && response.data.success) {
-      toast.success("Proposal updated successfully!");
+      toast.success('Proposal updated successfully!');
       return response.data.data;
     } else {
-      throw new Error(response.data.message || 'API failed to update the proposal.');
+      throw new Error(
+        response.data.message || 'API failed to update the proposal.'
+      );
     }
   } catch (error) {
     console.error(`Failed to update proposal ${proposalId}:`, error);
@@ -141,27 +139,24 @@ export async function updateProposal(proposalId: string, proposalData: UpdatePro
   }
 }
 
-
-
-
-
-
-
-export async function deleteProposal(proposalId: string): Promise<{ message: string }> {
+export async function deleteProposal(
+  proposalId: string
+): Promise<{ message: string }> {
   const apiEndpoint = `/api/v1/proposals/${proposalId}`;
-  
+
   try {
     console.log(`Deleting proposal ${proposalId}...`);
-    
-    const response = await api.delete<ApiResponse<{ message: string }>>(apiEndpoint, {
-      activeRole: 'AUDITOR'
-    });
-    
+
+    const response =
+      await api.delete<ApiResponse<{ message: string }>>(apiEndpoint);
+
     if (response.data && response.data.success) {
-      toast.success("Proposal deleted successfully!");
+      toast.success('Proposal deleted successfully!');
       return response.data.data; // Assuming backend returns a data object with a message
     } else {
-      throw new Error(response.data.message || 'API failed to delete the proposal.');
+      throw new Error(
+        response.data.message || 'API failed to delete the proposal.'
+      );
     }
   } catch (error) {
     console.error(`Failed to delete proposal ${proposalId}:`, error);

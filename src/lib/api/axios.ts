@@ -4,7 +4,7 @@ import { auth } from '@/lib/firebase';
 // This allows us to pass a custom `activeRole` in our axios config
 declare module 'axios' {
   export interface AxiosRequestConfig {
-    activeRole?: 'USER' | 'AUDITOR' | 'ADMIN';
+    activeRole?: 'AUDITOR';
   }
 }
 
@@ -28,6 +28,27 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Response interceptor: Return only data if success === true
+axiosInstance.interceptors.response.use(
+  (response) => {
+    const data = response.data;
+
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    if (data?.success === true) {
+      return data; // ✅ return actual payload
+    } else {
+      const error = data?.message || 'Unknown API response error';
+      return Promise.reject(new Error(error));
+    }
+  },
+  (error) => {
+    return Promise.reject(error); // Network/server error
+  }
 );
 
 export default axiosInstance;
