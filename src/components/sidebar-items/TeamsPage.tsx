@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AuditorCard } from './AuditorCard';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +21,20 @@ import { AuditorDetailDialog } from './AuditorDetailDialog';
 
 export default function TeamsPage() {
   const { user, loading: authLoading } = useAuth();
-  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
+
+  const my_profile = useMemo(() => {
+    // Make it safer by checking if the item exists
+    const profileString = localStorage.getItem('userProfile');
+    if (!profileString) return null;
+
+    try {
+      return JSON.parse(profileString);
+    } catch (error) {
+      console.error('Failed to parse userProfile from localStorage', error);
+      return null;
+    }
+  }, []); // 3. Use an empty dependency array to run this ONLY ONCE
+
 
   // State for data fetching
   const [auditors, setAuditors] = useState<AuditorProfile[]>([]);
@@ -51,6 +64,7 @@ export default function TeamsPage() {
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
         });
+        console.log(sortedAuditors)
         setAuditors(sortedAuditors);
       }
     } catch (error) {
@@ -61,7 +75,7 @@ export default function TeamsPage() {
   };
 
   useEffect(() => {
-    if (!authLoading && my_profile) {
+    if (!authLoading && user && my_profile) {
       fetchTeamMembers();
     } else if (!authLoading && !my_profile) {
       setIsLoading(false);

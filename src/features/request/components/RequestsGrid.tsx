@@ -75,7 +75,7 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
   const [isopen, setIsopen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isSubmitModelOpen, setIsSubmitModelOpen] = useState(false);
-  const profile = useProfileStore.getState().profile;
+  
   const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
   
 

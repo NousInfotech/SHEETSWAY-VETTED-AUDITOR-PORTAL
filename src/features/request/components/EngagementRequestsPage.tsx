@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import RequestsGrid from './RequestsGrid';
 import { useEngagementRequests } from '../hooks/useEngagementRequests';
 import PreviewModal from './PreviewModal';
@@ -38,7 +38,20 @@ const EngagementRequestsPage: React.FC = () => {
   } = useEngagementRequests();
 
   const { user, loading: authLoading } = useAuth();
-  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
+
+  const my_profile = useMemo(() => {
+    // Make it safer by checking if the item exists
+    const profileString = localStorage.getItem('userProfile');
+    if (!profileString) return null;
+
+    try {
+      return JSON.parse(profileString);
+    } catch (error) {
+      console.error("Failed to parse userProfile from localStorage", error);
+      return null;
+    }
+  }, []); // 3. Use an empty dependency array to run this ONLY ONCE
+
 
   const [clientRequests, setClientRequests] = useState<ClientRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +71,7 @@ const EngagementRequestsPage: React.FC = () => {
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
           });
+          console.log(sortedRequests)
           setClientRequests(sortedRequests);
         } else {
           setError('Failed to fetch proposals.');
@@ -71,7 +85,7 @@ const EngagementRequestsPage: React.FC = () => {
       }
     };
 
-    if (!authLoading && my_profile) {
+    if (!authLoading && user && my_profile) {
       fetchClientRequests();
     } else if (!authLoading && !my_profile) {
       setIsLoading(false);

@@ -97,7 +97,7 @@ export default function SignUpViewPage({
     }
   };
 
-  // --- NO CHANGES TO THE UI (JSX) BELOW, EXCEPT FOR ADDING ONE FIELD ---
+  
 
   return (
     <div className={`flex min-h-screen ${isDark ? 'bg-gray-950' : 'bg-white'}`}>

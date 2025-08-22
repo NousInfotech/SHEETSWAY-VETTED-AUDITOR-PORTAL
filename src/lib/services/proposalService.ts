@@ -67,9 +67,7 @@ interface ApiResponse<T> {
 
 export async function getProposals(): Promise<Proposal[] | null> {
   try {
-    const response = await api.get<ProposalsApiResponse>('/api/v1/proposals/', {
-      activeRole: 'AUDITOR'
-    });
+    const response = await api.get<ProposalsApiResponse>('/api/v1/proposals/');
 
     if (response.data && response.data.success) {
       toast.success(response.data.message);

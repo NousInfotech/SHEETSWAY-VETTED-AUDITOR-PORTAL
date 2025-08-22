@@ -69,9 +69,7 @@ interface ClientRequestsApiResponse {
 export async function getClientRequests(): Promise<ClientRequest[] | null> {
   const apiEndpoint = '/api/v1/client-requests';
   try {
-    const response = await api.get<ClientRequestsApiResponse>(apiEndpoint, {
-      activeRole: 'AUDITOR'
-    });
+    const response = await api.get<ClientRequestsApiResponse>(apiEndpoint);
 
     if (response.data && response.data.success) {
       return response.data.data;
@@ -82,5 +80,3 @@ export async function getClientRequests(): Promise<ClientRequest[] | null> {
     throw error;
   }
 }
-
-
