@@ -259,7 +259,8 @@ const RequestsGrid: React.FC<RequestsGridProps> = ({
                   ) : (
                     <>
                       <div className='text-sm'>
-                        <div className='flex items-end gap-5'>
+                        <div className='flex items-end gap-4'>
+                          <UserCircle className='text-muted-foreground/80 h-9 w-9' />
                           <div className='flex-col'>
                             <span className='text-foreground font-semibold'>
                               {request.timeZone}

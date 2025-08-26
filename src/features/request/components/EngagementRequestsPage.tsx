@@ -12,6 +12,7 @@ import {
 } from '@/lib/services/clientRequestService';
 import { useAuth } from '@/components/layout/providers';
 import { toast } from 'sonner';
+import { listClientRequests } from '@/api/client-request.api';
 
 const EngagementRequestsPage: React.FC = () => {
   const {
@@ -47,11 +48,10 @@ const EngagementRequestsPage: React.FC = () => {
     try {
       return JSON.parse(profileString);
     } catch (error) {
-      console.error("Failed to parse userProfile from localStorage", error);
+      console.error('Failed to parse userProfile from localStorage', error);
       return null;
     }
   }, []); // 3. Use an empty dependency array to run this ONLY ONCE
-
 
   const [clientRequests, setClientRequests] = useState<ClientRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,23 +63,24 @@ const EngagementRequestsPage: React.FC = () => {
       setError(null);
       try {
         const data = await getClientRequests();
+
         if (data) {
           const sortedRequests = data.sort((a, b) => {
-            // THE FIX: Use .getTime() to convert dates to numbers before subtracting.
+            // Use .getTime() to convert dates to numbers before subtracting.
             // This sorts in descending order (newest first).
             return (
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
           });
-          console.log(sortedRequests)
+          console.log(sortedRequests);
           setClientRequests(sortedRequests);
         } else {
-          setError('Failed to fetch proposals.');
-          toast.error('Could not load proposals.');
+          setError('Failed to fetch Requests.');
+          toast.error('Could not load Requests.');
         }
       } catch (err) {
         setError('An error occurred while fetching data.');
-        toast.error('Failed to load proposals.');
+        toast.error('Failed to load Requests.');
       } finally {
         setIsLoading(false);
       }

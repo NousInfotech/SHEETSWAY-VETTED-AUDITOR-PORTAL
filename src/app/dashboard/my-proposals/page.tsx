@@ -51,7 +51,7 @@ export default function MyProposalsPage() {
           (item) => item.auditFirmId === my_profile.auditFirmId
         );
         const sortedProposals = myfirmProposals.sort((a, b) => {
-          // THE FIX: Use .getTime() to convert dates to numbers before subtracting.
+          //  Use .getTime() to convert dates to numbers before subtracting.
           // This sorts in descending order (newest first).
           return (
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -93,10 +93,10 @@ export default function MyProposalsPage() {
 
   const renderContent = () => {
     if (isLoading) {
-      /* ... loading UI ... */
+      <div className='text-xl text-red-500 font-medium w-full max-w-6xl mx-auto my-24'>Loading......</div>
     }
     if (proposals.length === 0) {
-      /* ... empty state UI ... */
+      <div className='text-xl text-red-500 font-medium w-full max-w-6xl mx-auto my-24'>No Proposals Available!!!</div>
     }
 
     return (

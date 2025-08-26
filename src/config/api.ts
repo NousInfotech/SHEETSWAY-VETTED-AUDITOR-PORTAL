@@ -1,4 +1,4 @@
-// Centralized API endpoints for the marketplace
+
 
 // Business Profiles
 export const BUSINESS_PROFILES_API = '/api/v1/users/business-profiles';

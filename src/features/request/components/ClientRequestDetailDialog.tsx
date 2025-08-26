@@ -16,7 +16,7 @@ import { formatDate, formatCurrency } from './lib/utils';
 import {
   CalendarDays,
   Clock,
-  DollarSign,
+  Euro,
   Globe,
   Languages,
   Send,
@@ -95,7 +95,7 @@ export function ClientRequestDetailDialog({
           <div className="py-4 border-t border-b">
             <h3 className="text-lg font-semibold mb-4">Key Metrics</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-6">
-                <InfoItem icon={DollarSign} label="Budget" value={formatCurrency(request.budget, 'USD')} />
+                <InfoItem icon={Euro} label="Budget" value={request.budget} />
                 <InfoItem icon={CalendarDays} label="Deadline" value={formatDate(request.deadline)} />
                 <InfoItem icon={Clock} label="Estimated Duration" value={getDuration()} />
                 <InfoItem icon={Building} label="Financial Year" value={formatDate(request.financialYear).split(',')[1]} />

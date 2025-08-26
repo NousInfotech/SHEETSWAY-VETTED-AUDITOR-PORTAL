@@ -54,12 +54,14 @@ import { Calendar } from '@/components/ui/calendar';
 import { X, Loader2, PlusCircle, Trash2, CalendarIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { ClientRequest } from '@/lib/services/clientRequestService';
 
 type FormValues = z.infer<typeof ProposalFormSchema>;
 
 interface ProposalFormProps {
   proposalToEdit?: Proposal | null;
   clientRequestId?: string;
+  request?: ClientRequest;
   auditorId?: string;
   auditFirmId?: string;
   onFormSubmit?: () => void;
@@ -78,6 +80,7 @@ const currencySymbols: Record<Currency, string> = {
 export function CreateProposalForm({
   proposalToEdit,
   clientRequestId,
+  request,
   auditorId,
   auditFirmId,
   onFormSubmit,
@@ -95,7 +98,9 @@ export function CreateProposalForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(ProposalFormSchema),
     defaultValues: {
-      proposalName: '',
+      proposalName: request?.title
+        ? `${request.title} - ${Math.floor(1000 + Math.random() * 9000)}`
+        : '',
       description: '',
       quotation: '' as any,
       currency: Currency.EUR,
@@ -125,7 +130,6 @@ export function CreateProposalForm({
       }
     }
   }, [dateRange, form.setValue]);
-  
 
   useEffect(() => {
     if (isEditMode && proposalToEdit) {

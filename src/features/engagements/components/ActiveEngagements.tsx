@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { Engagement, Filters } from '../types/engagement-types';
 import { statusConfig, priorityConfig } from '../constants/config';
@@ -18,19 +19,29 @@ import {
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { SigningPortalModal } from './SigningPortalModal';
+
+import { useAuth } from '@/components/layout/providers';
+
+import { useMemo } from 'react';
 
 interface ActiveEngagementsProps {
-  engagements: Engagement[];
-  onEnterWorkspace: (engagement: Engagement) => void;
+  engagements: any[];
+  selectedEngagement: any | null;
+  setSelectedEngagement: React.Dispatch<React.SetStateAction<any | null>>;
+  onEnterWorkspace: (engagement: any) => void;
   onRefresh?: () => void;
 }
 
 const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
   engagements,
+  selectedEngagement,
+  setSelectedEngagement,
   onEnterWorkspace,
   onRefresh
 }) => {
-  const my_profile = JSON.parse(localStorage.getItem('userProfile')!);
+  const [isSignModalOpen, setIsSignModalOpen] = useState<boolean>(false);
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filters, setFilters] = useState<Filters>({
     search: '',
@@ -42,14 +53,31 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
     'clientName' | 'status' | 'startDate' | 'deadline' | 'progress'
   >('clientName');
 
-  const sortEngagements = (list: Engagement[]) => {
+  const { user, loading: authLoading } = useAuth();
+
+  const my_profile = useMemo(() => {
+    // Make it safer by checking if the item exists
+    const profileString = localStorage.getItem('userProfile');
+    if (!profileString) return null;
+
+    try {
+      return JSON.parse(profileString);
+    } catch (error) {
+      console.error('Failed to parse userProfile from localStorage', error);
+      return null;
+    }
+  }, []); // 3. Use an empty dependency array to run this ONLY ONCE
+
+  let userId = my_profile.id;
+
+  const sortEngagements = (list: any[]) => {
     switch (sortOption) {
       case 'clientName':
         return [...list].sort((a, b) =>
-          a.clientName.localeCompare(b.clientName)
+          a.request.title.localeCompare(b.request.title)
         );
       case 'status':
-        return [...list].sort((a, b) => a.status.localeCompare(b.status));
+        return [...list].sort((a, b) => 'In Progress'.localeCompare(b.status));
       case 'startDate':
         return [...list].sort(
           (a, b) =>
@@ -58,7 +86,8 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
       case 'deadline':
         return [...list].sort(
           (a, b) =>
-            new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+            new Date(a.request.deadline).getTime() -
+            new Date(b.request.deadline).getTime()
         );
       case 'progress':
         return [...list].sort((a, b) => b.progress - a.progress);
@@ -70,17 +99,17 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
   const filteredEngagements = sortEngagements(
     engagements.filter((engagement) => {
       const matchesSearch =
-        engagement.clientName
+        engagement.request.title
           .toLowerCase()
           .includes(filters.search.toLowerCase()) ||
-        engagement.description
+        'engagement description'
           .toLowerCase()
           .includes(filters.search.toLowerCase());
-      const matchesStatus =
-        !filters.status || engagement.status === filters.status;
+      const matchesStatus = !filters.status || 'In Progress' === filters.status;
       const matchesType = !filters.type || engagement.type === filters.type;
       const matchesFramework =
-        !filters.framework || engagement.framework === filters.framework;
+        !filters.framework ||
+        engagement.request.framework === filters.framework;
       return matchesSearch && matchesStatus && matchesType && matchesFramework;
     })
   );
@@ -231,65 +260,70 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
     );
   };
 
-  const EngagementCard = ({ engagement }: { engagement: Engagement }) => {
-    const StatusIcon = statusConfig[engagement.status].icon;
-    const isOverdue = new Date(engagement.deadline) < new Date();
+  const EngagementCard = ({ engagement }: { engagement: any }) => {
+    const StatusIcon = statusConfig['In Progress'].icon;
+    const isOverdue = new Date(engagement.request.deadline) < new Date();
     return (
       <div className='bg-card dark:bg-card border-border rounded-lg border transition-all duration-200 hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-600'>
         <div className='p-2'>
           <div className='mb-4 flex items-start justify-between'>
             <div className='flex-1'>
               <h3 className='text-foreground mb-1 text-lg font-semibold'>
-                {engagement.clientName}
+                {engagement.request.title}
               </h3>
-              {/* Accepted Proposal (placeholder) */}
+              {/* Auditor Names */}
+              <p className='mb-1 text-sm text-blue-700 dark:text-blue-300'>
+                {engagement.auditor.name}
+              </p>
+              {/* Proposal (mocked) */}
               <p className='mb-1 text-sm text-green-700 dark:text-green-300'>
-                Accepted Proposal: View proposal details
+                Proposal: View proposal details
               </p>
               {/* Scope */}
               <p className='mb-2 text-sm text-gray-600 dark:text-gray-300'>
-                Scope: {engagement.description}
+                Scope: tax compliance and filing requirements
               </p>
               <div className='flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400'>
                 <div className='flex items-center gap-1'>
                   <Building className='h-4 w-4' />
-                  <span>{engagement.type}</span>
+                  <span>{engagement.request.type}</span>
                 </div>
                 <div className='flex items-center gap-1'>
                   <Tag className='h-4 w-4' />
-                  <span>{engagement.framework}</span>
+                  <span>{engagement.request.framework}</span>
                 </div>
               </div>
             </div>
             <div
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${priorityConfig[engagement.priority].textColor} bg-opacity-10`}
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${priorityConfig['Medium'].textColor} bg-opacity-10`}
             >
+              Medium
               <span
-                className={`h-2 w-2 rounded-full ${priorityConfig[engagement.priority].color}`}
+                className={`h-2 w-2 rounded-full ${priorityConfig['Medium'].color}`}
               ></span>
               {engagement.priority}
             </div>
           </div>
           <div className='mb-4 flex items-center justify-between'>
             <div
-              className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${statusConfig[engagement.status].textColor} bg-opacity-10`}
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium ${statusConfig['In Progress'].textColor} bg-opacity-10`}
             >
               <StatusIcon className='h-4 w-4' />
-              {engagement.status}
+              In progress
             </div>
             <div className='text-sm text-gray-600 dark:text-gray-300'>
-              {engagement.progress}% Complete
+              {2}% Complete
             </div>
           </div>
           <div className='mb-4'>
             <div className='mb-1 flex justify-between text-sm text-gray-600 dark:text-gray-300'>
               <span>Progress</span>
-              <span>{engagement.progress}%</span>
+              <span>{2}%</span>
             </div>
             <div className='h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700'>
               <div
                 className='h-2 rounded-full bg-blue-600 transition-all duration-300'
-                style={{ width: `${engagement.progress}%` }}
+                style={{ width: `${2}%` }}
               ></div>
             </div>
           </div>
@@ -305,7 +339,8 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
             >
               <Clock className='h-4 w-4' />
               <span>
-                Due: {new Date(engagement.deadline).toLocaleDateString()}
+                Due:{' '}
+                {new Date(engagement.request.deadline).toLocaleDateString()}
               </span>
               {isOverdue && (
                 <AlertCircle className='h-4 w-4 text-red-600 dark:text-red-400' />
@@ -313,48 +348,78 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
             </div>
           </div>
           <div className='flex w-full items-center justify-between'>
-            <button
-              onClick={() => onEnterWorkspace(engagement)}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors ${
-                my_profile.role === 'JUNIOR'
-                  ? 'bg-muted text-muted-foreground cursor-not-allowed' // Styles for JUNIOR
-                  : 'bg-blue-600 text-white hover:bg-blue-700' // Styles for everyone else
-              }`}
-              // 3. IMPORTANT: Also disable the button functionally
-              disabled={my_profile.role === 'JUNIOR'}
-            >
-              <Play className='h-4 w-4' />
-              Enter Workspace
-              <ArrowRight className='h-4 w-4' />
-            </button>
+            <div className='flex items-center gap-1'>
+              <User className='h-4 w-4 text-gray-500 dark:text-gray-400' />
+              <span className='text-sm whitespace-nowrap text-gray-600 dark:text-gray-300'>
+                1 member
+              </span>
+            </div>
+            {engagement.status !== 'AWAITING_PAYMENT' &&
+              engagement.status !== 'ACTIVE' && (
+                <button
+                  // onClick={() => onEnterWorkspace(engagement)}
+                  onClick={() => {
+                    setSelectedEngagement(engagement);
+                    setIsSignModalOpen(true);
+                  }}
+                  className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+                >
+                  <Play className='h-4 w-4' />
+                  GO TO START
+                  <ArrowRight className='h-4 w-4' />
+                </button>
+              )}
+            {engagement.status === 'AWAITING_PAYMENT' && (
+              <button
+                // onClick={() => onEnterWorkspace(engagement)}
+                onClick={() => {
+                  setSelectedEngagement(engagement);
+                }}
+                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+              >
+                <Play className='h-4 w-4' />
+                GO TO PAYMENT
+                <ArrowRight className='h-4 w-4' />
+              </button>
+            )}
+            {engagement.status === 'ACTIVE' && (
+              <button
+                onClick={() => onEnterWorkspace(engagement)}
+                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+              >
+                <Play className='h-4 w-4' />
+                WORKSPACE
+                <ArrowRight className='h-4 w-4' />
+              </button>
+            )}
           </div>
         </div>
       </div>
     );
   };
 
-  const EngagementListItem = ({ engagement }: { engagement: Engagement }) => {
-    const StatusIcon = statusConfig[engagement.status].icon;
-    const isOverdue = new Date(engagement.deadline) < new Date();
+  const EngagementListItem = ({ engagement }: { engagement: any }) => {
+    const StatusIcon = statusConfig['In Progress'].icon;
+    const isOverdue = new Date(engagement.request.deadline) < new Date();
     return (
       <div className='bg-card hover:bg-muted/50 grid min-w-[1280px] shrink-0 grid-cols-[2fr_1fr_1fr_150px_180px_auto] items-center gap-4 border-b p-4 transition-colors last:border-b-0 md:min-w-full'>
         <div className=''>
           <div className='text-foreground font-semibold'>
-            {engagement.clientName}
+            {engagement.request.title}
           </div>
           <div className='text-muted-foreground line-clamp-1 text-sm'>
-            {engagement.description}
+            tax compliance and filing requirements
           </div>
         </div>
 
         <div className='text-muted-foreground text-sm'>
           <div className='flex items-center gap-1.5'>
             <Building className='h-4 w-4 flex-shrink-0' />
-            <span>{engagement.type}</span>
+            <span>{engagement.request.type}</span>
           </div>
           <div className='mt-1 flex items-center gap-1.5'>
             <Tag className='h-4 w-4 flex-shrink-0' />
-            <span>{engagement.framework}</span>
+            <span>{engagement.request.framework}</span>
           </div>
         </div>
 
@@ -362,13 +427,13 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           className={`flex items-center gap-2 text-sm font-medium ${'text-yellow-500' /*statusConfig[engagement.status].textColor*/}`}
         >
           <Clock className='h-4 w-4' /* <StatusIcon /> */ />
-          <span>{engagement.status}</span>
+          <span>In progress</span>
         </div>
 
         <div>
           <Progress value={engagement.progress} />
           <div className='text-muted-foreground mt-1 text-right text-xs'>
-            {engagement.progress}%
+            {2}%
           </div>
         </div>
 
@@ -376,19 +441,51 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           className={`flex items-center gap-1.5 text-sm whitespace-nowrap ${true ? 'text-destructive font-medium' : 'text-muted-foreground'}`}
         >
           <Clock className='h-4 w-4' />
-          <span>{new Date(engagement.deadline).toLocaleDateString()}</span>
+          <span>
+            {new Date(engagement.request.deadline).toLocaleDateString()}
+          </span>
           {true && <AlertCircle className='h-4 w-4' />}
         </div>
 
         <div className='text-right'>
-          <Button
-            onClick={() => onEnterWorkspace(engagement)}
-            variant='outline'
-            size='sm'
-          >
-            <Play className='h-4 w-4 md:mr-2' />
-            <span className='inline'>Workspace</span>
-          </Button>
+          {engagement.status !== 'AWAITING_PAYMENT' &&
+            engagement.status !== 'ACTIVE' && (
+              <Button
+                // onClick={() => onEnterWorkspace(engagement)}
+                onClick={() => {
+                  setSelectedEngagement(engagement);
+                  setIsSignModalOpen(true);
+                }}
+                variant='outline'
+                size='sm'
+              >
+                <Play className='h-4 w-4 md:mr-2' />
+                <span className='inline text-xs'>GO TO START</span>
+              </Button>
+            )}
+          {engagement.status === 'AWAITING_PAYMENT' && (
+            <Button
+              // onClick={() => onEnterWorkspace(engagement)}
+              onClick={() => {
+                setSelectedEngagement(engagement);
+              }}
+              variant='outline'
+              size='sm'
+            >
+              <Play className='h-4 w-4 md:mr-2' />
+              <span className='inline text-xs'>GO TO PAYMENT</span>
+            </Button>
+          )}
+          {engagement.status === 'ACTIVE' && (
+            <Button
+              onClick={() => onEnterWorkspace(engagement)}
+              variant='outline'
+              size='sm'
+            >
+              <Play className='h-4 w-4 md:mr-2' />
+              <span className='inline text-xs'>WORK SPACE</span>
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -439,6 +536,15 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           </div>
         )}
       </main>
+
+      {isSignModalOpen && (
+        <SigningPortalModal
+          selectedEngagement={selectedEngagement}
+          open={isSignModalOpen}
+          onOpenChange={setIsSignModalOpen}
+          onEnterWorkspace={onEnterWorkspace}
+        />
+      )}
     </div>
   );
 };

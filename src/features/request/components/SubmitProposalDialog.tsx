@@ -41,6 +41,7 @@ function SubmitProposalDialog({
           <div className='flex-grow overflow-y-auto pr-2'>
             <CreateProposalForm
               clientRequestId={request?.id}
+              request={request}
               
               
             />

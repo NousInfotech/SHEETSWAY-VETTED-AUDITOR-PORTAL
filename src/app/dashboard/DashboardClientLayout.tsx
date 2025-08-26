@@ -6,7 +6,6 @@ import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
 import { useAuth } from '@/components/layout/providers';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { useProfileStore } from '@/stores/useProfileStore';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

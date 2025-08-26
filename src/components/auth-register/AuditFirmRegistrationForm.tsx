@@ -124,7 +124,6 @@ export function AuditFirmRegistrationForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const firebaseUser = useAuthStore((state) => state.firebaseUser);
 
   const setProfile = useProfileStore((state) => state.setProfile);
 
@@ -239,52 +238,71 @@ export function AuditFirmRegistrationForm() {
       if (response.data && response.data.success) {
         // We successfully created the user. Now, we must fetch their profile.
 
+        const loadingToastId = toast.loading('Registration successful!', {
+          description: 'Finalizing your account setup...'
+        });
+
         const MAX_RETRIES = 5;
-        const RETRY_DELAY = 1000; // 1 second
+        const INITIAL_DELAY = 500; // Start with 500ms
         let profileData = null;
 
-        for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-          console.log(`Fetching profile, attempt ${attempt}...`);
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+          try {
+            console.log(`Fetching profile, attempt ${attempt + 1}...`);
+            const fetchedProfile = await getProfileOnSignIn(idToken, 'AUDITOR');
 
-          const fetchedProfile = await getProfileOnSignIn(idToken, 'AUDITOR');
+            if (fetchedProfile) {
+              profileData = fetchedProfile;
+              console.log('Profile fetched successfully!');
+              break; // Success! Exit the loop.
+            }
 
-          if (fetchedProfile) {
-            // Success! We got the profile.
-            profileData = fetchedProfile;
-            console.log('Profile fetched successfully!');
-            break; // Exit the loop
+            // If profile is null but it's the last attempt, we'll let it fall through to the error state.
+            if (attempt === MAX_RETRIES - 1) {
+              console.warn(
+                `Profile not found after all ${MAX_RETRIES} attempts.`
+              );
+            }
+          } catch (apiError) {
+            console.error(
+              `Attempt ${attempt + 1} failed with an API error:`,
+              apiError
+            );
+            // If an actual error occurs (not just null), and it's the last attempt, let it fail.
+            if (attempt === MAX_RETRIES - 1) {
+              throw new Error(
+                'An error occurred while fetching your profile. Please try logging in again.'
+              );
+            }
           }
 
-          // If profile not found, wait and retry (unless it's the last attempt)
-          if (attempt < MAX_RETRIES) {
-            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-          }
+          // Wait before the next retry, doubling the delay each time
+          const delay = INITIAL_DELAY * Math.pow(2, attempt);
+          console.log(`Profile not found, waiting ${delay}ms before retrying.`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
 
-        // After the loop, check if we ever succeeded.
+        // Step 3: Dismiss the loading toast
+        toast.dismiss(loadingToastId);
+
+        // Step 4: Check the result of our retry loop
         if (profileData) {
           // HAPPY PATH: We got the profile data.
           setProfile(profileData);
           localStorage.setItem('userProfile', JSON.stringify(profileData));
 
-          toast.success('Firm Registration Successful! 🚀');
+          toast.success('Account Setup Complete! 🚀');
           router.push('/dashboard/overview');
 
           form.reset();
           setSelectedFiles([]);
         } else {
-          // UNHAPPY PATH: All retries failed. This is a real error.
-          // Do NOT sign the user out. Their account exists. Guide them.
-          console.error(
-            `Failed to fetch profile after ${MAX_RETRIES} attempts.`
-          );
-          // Throw a more accurate error to be caught by the main catch block.
+          // UNHAPPY PATH: All retries failed. This is now a very reliable error.
           throw new Error(
-            'Your registration was successful, but we could not retrieve your profile. Please try logging in again.'
+            'Your registration was successful, but we could not retrieve your profile. Please try logging in again to complete the setup.'
           );
         }
       } else {
-        // Handle cases where the API returns a 200 OK status but indicates failure in the body.
         throw new Error(
           response.data.message ||
             'API returned a success status but indicated failure.'
