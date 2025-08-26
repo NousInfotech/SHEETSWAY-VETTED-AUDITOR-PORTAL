@@ -6,5 +6,5 @@ import instance from "@/lib/api/axios";
 export const createSessionForSaltedge = async (params?: Record<string, any>) => {
   const response = await instance.post(`${SALTEDGE_API}/create-session`, { params });
   console.log(response.data)
-  return response.data;
+  return response.data.data;
 };

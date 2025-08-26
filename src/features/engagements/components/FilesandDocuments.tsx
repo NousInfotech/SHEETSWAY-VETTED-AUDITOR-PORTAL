@@ -644,6 +644,7 @@ export default function FilesandDocuments({ engagement }: any) {
         setLibraries([]);
         return;
       }
+      
       setPrimaryRootId(roots[0].id);
 
       let allRootFolders: any[] = [];

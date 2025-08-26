@@ -75,7 +75,7 @@ export async function getAccessUrlForFile(fileKey: string): Promise<string> {
   const response = await axiosInstance.post('/api/v1/upload/single/access', {
     fileKey,
   });
-  return response.data;
+  return response.data.data;
 }
 
 
@@ -86,5 +86,5 @@ export async function getAccessUrlsForFiles(fileKeys: string[]): Promise<string[
   const response = await axiosInstance.post('/api/v1/upload/multiple/access', {
     fileKeys,
   });
-  return response.data;
+  return response.data.data;
 }

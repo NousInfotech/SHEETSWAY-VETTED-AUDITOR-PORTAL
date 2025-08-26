@@ -375,11 +375,11 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                 onClick={() => {
                   setSelectedEngagement(engagement);
                 }}
-                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
+                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700 opacity-40 cursor-not-allowed'
               >
                 <Play className='h-4 w-4' />
-                GO TO PAYMENT
-                <ArrowRight className='h-4 w-4' />
+                CLIENT PROCESSING...
+                {/* <ArrowRight className='h-4 w-4' /> */}
               </button>
             )}
             {engagement.status === 'ACTIVE' && (
@@ -465,6 +465,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
             )}
           {engagement.status === 'AWAITING_PAYMENT' && (
             <Button
+            className='opacity-40 cursor-not-allowed'
               // onClick={() => onEnterWorkspace(engagement)}
               onClick={() => {
                 setSelectedEngagement(engagement);
@@ -473,7 +474,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               size='sm'
             >
               <Play className='h-4 w-4 md:mr-2' />
-              <span className='inline text-xs'>GO TO PAYMENT</span>
+              <span className='inline text-xs'>PROCESSING</span>
             </Button>
           )}
           {engagement.status === 'ACTIVE' && (

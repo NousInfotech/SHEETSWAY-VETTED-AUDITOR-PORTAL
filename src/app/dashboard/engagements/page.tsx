@@ -26,7 +26,6 @@ export default function Page() {
   const {
     loadClientEngagements,
     loading: engagementsLoading,
-    clientEngagements
   } = useClientEngagementStore();
 
   useEffect(() => {
