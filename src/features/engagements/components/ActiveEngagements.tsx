@@ -21,9 +21,19 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { SigningPortalModal } from './SigningPortalModal';
 
-import { useAuth } from '@/components/layout/providers';
+// payment
+import { loadStripe } from '@stripe/stripe-js';
+import PaymentModal from './PaymentModal';
 
+import { useAuth } from '@/components/layout/providers';
+import instance from '@/lib/api/axios';
+import { ENGAGEMENT_API } from '@/config/api';
+import { useClientEngagementStore } from '../store';
 import { useMemo } from 'react';
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY as string
+);
 
 interface ActiveEngagementsProps {
   engagements: any[];
@@ -42,6 +52,9 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
 }) => {
   const [isSignModalOpen, setIsSignModalOpen] = useState<boolean>(false);
 
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [filters, setFilters] = useState<Filters>({
     search: '',
@@ -50,25 +63,75 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
     framework: ''
   });
   const [sortOption, setSortOption] = useState<
-    'clientName' | 'status' | 'startDate' | 'deadline' | 'progress'
-  >('clientName');
+    | 'clientName'
+    | 'status'
+    | 'startDate'
+    | 'deadline'
+    | 'progress'
+    | 'createdAt'
+    | 'updatedAt'
+  >('createdAt');
 
   const { user, loading: authLoading } = useAuth();
 
   const my_profile = useMemo(() => {
-    // Make it safer by checking if the item exists
-    const profileString = localStorage.getItem('userProfile');
-    if (!profileString) return null;
+      // Make it safer by checking if the item exists
+      const profileString = localStorage.getItem('userProfile');
+      if (!profileString) return null;
+  
+      try {
+        return JSON.parse(profileString);
+      } catch (error) {
+        console.error('Failed to parse userProfile from localStorage', error);
+        return null;
+      }
+    }, []); // 3. Use an empty dependency array to run this ONLY ONCE
+
+  let userId = my_profile?.id;
+
+  // Get the specific action from your store
+  const { loadClientEngagements } = useClientEngagementStore();
+
+  const handleUploadSuccess = () => {
+    // Step 1: Immediately close the modal. This provides instant feedback to the user.
+    setIsSignModalOpen(false);
+
+    // Step 2: Trigger the store to refresh the data.
+    // The store will handle setting its own loading and error states.
+    if (my_profile?.id) {
+      loadClientEngagements(my_profile.id);
+    } else {
+      console.error('User ID not available to refresh engagements.');
+    }
+  };
+
+  const handlePayment = async (id: string) => {
+    setIsProcessing(true);
 
     try {
-      return JSON.parse(profileString);
-    } catch (error) {
-      console.error('Failed to parse userProfile from localStorage', error);
-      return null;
-    }
-  }, []); // 3. Use an empty dependency array to run this ONLY ONCE
+      const res = await instance.post(
+        `${ENGAGEMENT_API}/${id}/pre-engagement-payment/create`,
+        { userId }
+      );
 
-  let userId = my_profile.id;
+      console.log('Full response from backend:', res.data);
+
+      const checkoutUrl = res.data?.checkoutUrl;
+
+      if (!checkoutUrl) {
+        throw new Error("Checkout URL was not found in the server's response.");
+      }
+
+      window.location.href = checkoutUrl;
+    } catch (error) {
+      console.error('Payment Error:', error);
+      alert(
+        `Payment failed: ${error instanceof Error ? error.message : 'Unknown Error'}`
+      );
+
+      setIsProcessing(false);
+    }
+  };
 
   const sortEngagements = (list: any[]) => {
     switch (sortOption) {
@@ -106,7 +169,8 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           .toLowerCase()
           .includes(filters.search.toLowerCase());
       const matchesStatus = !filters.status || 'In Progress' === filters.status;
-      const matchesType = !filters.type || engagement.type === filters.type;
+      const matchesType =
+        !filters.type || engagement.request.type === filters.type;
       const matchesFramework =
         !filters.framework ||
         engagement.request.framework === filters.framework;
@@ -172,6 +236,7 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
               }
               className='border-border bg-background text-foreground rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500'
             >
+              <option value='createdAt'>Sort: Created At</option>
               <option value='clientName'>Sort: Client Name</option>
               <option value='status'>Sort: Status</option>
               <option value='startDate'>Sort: Start Date</option>
@@ -374,12 +439,13 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
                 // onClick={() => onEnterWorkspace(engagement)}
                 onClick={() => {
                   setSelectedEngagement(engagement);
+                  setIsPaymentModalOpen(true);
                 }}
-                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700 opacity-40 cursor-not-allowed'
+                className='inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700'
               >
                 <Play className='h-4 w-4' />
-                CLIENT PROCESSING...
-                {/* <ArrowRight className='h-4 w-4' /> */}
+                GO TO PAYMENT
+                <ArrowRight className='h-4 w-4' />
               </button>
             )}
             {engagement.status === 'ACTIVE' && (
@@ -465,16 +531,16 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
             )}
           {engagement.status === 'AWAITING_PAYMENT' && (
             <Button
-            className='opacity-40 cursor-not-allowed'
               // onClick={() => onEnterWorkspace(engagement)}
               onClick={() => {
                 setSelectedEngagement(engagement);
+                setIsPaymentModalOpen(true);
               }}
               variant='outline'
               size='sm'
             >
               <Play className='h-4 w-4 md:mr-2' />
-              <span className='inline text-xs'>PROCESSING</span>
+              <span className='inline text-xs'>GO TO PAYMENT</span>
             </Button>
           )}
           {engagement.status === 'ACTIVE' && (
@@ -544,8 +610,21 @@ const ActiveEngagements: React.FC<ActiveEngagementsProps> = ({
           open={isSignModalOpen}
           onOpenChange={setIsSignModalOpen}
           onEnterWorkspace={onEnterWorkspace}
+          handleUploadSuccess={handleUploadSuccess}
         />
       )}
+
+      {/* 
+        === RENDER THE MODAL HERE === 
+        It lives outside the card's visual flow but is controlled by its state.
+      */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onOpenChange={setIsPaymentModalOpen}
+        engagement={selectedEngagement}
+        handlePayment={handlePayment}
+        isProcessing={isProcessing}
+      />
     </div>
   );
 };

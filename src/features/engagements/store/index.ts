@@ -29,18 +29,18 @@ export const useClientEngagementStore = create<ClientEngagementStore>(
       set({ selectedClientEngagement: clientEngagement }),
 
     // Action to load engagements from the API
-    loadClientEngagements: async (auditorId?: string) => {
+    loadClientEngagements: async (userId?: string) => {
       set({ loading: true, error: null });
       try {
-        const params = auditorId ? { auditorId } : {};
+        const params = userId ? { auditorId: userId } : {};
         const data = await listClientEngagements(params);
 
-        if (Array.isArray(data)) {
-          set({ clientEngagements: data, loading: false });
-        } else {
-          // This part might be hit if the backend is fixed
-          set({ clientEngagements: data.data, loading: false });
-        }
+        const sortedData = [...data].sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+
+        set({ clientEngagements: sortedData, loading: false });
       } catch (error: any) {
         set({
           error: error.message || 'Failed to load engagements',

@@ -1,9 +1,8 @@
 'use client';
 import { getEscrowbyEngagementId, getPaymentEscrow } from '@/api/engagement';
 import { useAuth } from '@/components/layout/providers';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import EscrowCard from './EscrowCard';
-import { useMemo } from 'react';
 
 const Loader = () => (
   <div className='flex h-[50vh] items-center justify-center p-10'>
@@ -34,7 +33,7 @@ export default function PaymentEscrowTab({ engagement }: any) {
 
   useEffect(() => {
     const fetchPaymentsEscrow = async (engagementId: string) => {
-      if (!my_profile.id || !engagementId) return;
+      if (!my_profile?.id || !engagementId) return;
 
       setPaymentEscrowLoading(true);
       setError(null);
@@ -65,7 +64,7 @@ export default function PaymentEscrowTab({ engagement }: any) {
       }
     };
 
-    if (!authLoading && my_profile.id) {
+    if (!authLoading && my_profile?.id) {
       fetchPaymentsEscrow(engagement?.id);
     }
   }, [authLoading, my_profile, engagement?.id]);

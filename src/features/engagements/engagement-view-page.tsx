@@ -19,7 +19,7 @@ import {
 } from './data/mock-data';
 import ActiveEngagements from './components/ActiveEngagements';
 import EngagementWorkspace from './components/EngagementWorkspace';
-import AccountingDataTab from './components/AccountingDataTab';
+// import AccountingDataTab from './components/AccountingDataTab';
 import BankingDataTab from './components/BankingDataTab';
 
 
@@ -71,6 +71,8 @@ const EngagementViewPage = () => {
 
     console.log(clientEngagements);
     setEngagements(clientEngagements);
+
+
 
     setAccountingData(
       savedAccountingData
@@ -190,7 +192,8 @@ const EngagementViewPage = () => {
             onBack={handleBackToEngagements}
           >
             {currentWorkspaceTab === 'accounting' && (
-              <AccountingDataTab data={accountingData} />
+              <></>
+              // <AccountingDataTab data={accountingData} />
             )}
             {currentWorkspaceTab === 'banking' && (
               <BankingDataView />
