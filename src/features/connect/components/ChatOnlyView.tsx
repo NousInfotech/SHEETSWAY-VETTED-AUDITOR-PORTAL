@@ -52,14 +52,39 @@
 // ###################################################################################################################
 
 'use client';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/components/layout/providers';
 import { ChatThread } from '@/features/chat/components/ChatThread';
 import { User } from '@/features/chat/lib/types';
+import { getClientUser } from '@/api/clientUser';
 
 // This component now has a single, clear responsibility:
 // display the chat for the currently logged-in client user.
 export default function ChatOnlyView({ engagement }: any) {
+  
+  const [clientUser, setclientUser] = useState<any>(null);
+
+  const [loading, setLoading] = useState(false);
+
+  const fetchClientUser = async (clientId: string) => {
+    setLoading(true);
+    try {
+      const client = await getClientUser(clientId);
+      console.log('client-user', client);
+      setclientUser(client);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (engagement?.request?.id) {
+      fetchClientUser(engagement?.request?.userId);
+    }
+  }, [engagement]);
+
+
   // 1. Get the authenticated client user from the auth context.
   const { user, loading: authLoading } = useAuth();
 
@@ -96,7 +121,7 @@ export default function ChatOnlyView({ engagement }: any) {
     };
 
     const receiver = {
-      name: engagement.auditor?.name || 'Provider'
+      name: clientUser?.name || 'Client'
     };
 
     return (

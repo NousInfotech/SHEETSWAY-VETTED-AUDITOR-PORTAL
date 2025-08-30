@@ -2,11 +2,11 @@ import React from 'react'; // Removed useEffect
 
 import BankingDashboardPage from '@/app/dashboard/banking&accounts/page';
 
-function BankingDataView() {
+function BankingDataView({engagement}:any) {
   return (
     <>
       <div className='mt-4 border-t p-4'>
-        <BankingDashboardPage />
+        <BankingDashboardPage engagement={engagement}/>
       </div>
     </>
   );

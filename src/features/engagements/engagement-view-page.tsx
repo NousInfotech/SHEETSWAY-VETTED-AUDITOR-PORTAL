@@ -196,7 +196,7 @@ const EngagementViewPage = () => {
               // <AccountingDataTab data={accountingData} />
             )}
             {currentWorkspaceTab === 'banking' && (
-              <BankingDataView />
+              <BankingDataView engagement={selectedEngagement}/>
             )}
             {currentWorkspaceTab === 'payments' && (
               <PaymentEscrowTab engagement={selectedEngagement} />

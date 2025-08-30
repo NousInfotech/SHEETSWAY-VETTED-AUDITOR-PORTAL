@@ -40,7 +40,7 @@ export const useChat = ({ threadId, currentUser }: UseChatProps) => {
 
       socket = io(SOCKET_URL, {
         transports: ['websocket'],
-        auth: { token: token, role: 'USER' }
+        auth: { token: token, role: 'AUDITOR' }
       });
       socketRef.current = socket;
 

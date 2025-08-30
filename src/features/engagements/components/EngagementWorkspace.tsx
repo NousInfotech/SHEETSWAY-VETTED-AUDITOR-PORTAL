@@ -52,7 +52,7 @@ const EngagementWorkspace: React.FC<EngagementWorkspaceProps> = ({
         {/* Messages Icon Button */}
         <button onClick={() => onTabChange('chat')} className='flex flex-nowrap gap-1 items-center text-white bg-green-500 px-6 py-2 rounded-full'>
             <MessageCircle />
-            <span>Chat&nbsp;With&nbsp;Auditor</span>
+            <span>Chat&nbsp;With&nbsp;Client</span>
           </button>
       </div>
     </header>
