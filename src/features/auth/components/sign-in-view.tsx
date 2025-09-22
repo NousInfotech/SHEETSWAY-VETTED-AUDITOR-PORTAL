@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
+import { useEffect, useState } from 'react';
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -31,11 +32,21 @@ export default function SignInViewPage({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-
   const setProfile = useProfileStore((state) => state.setProfile);
 
-  
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' });
+
+  // Optional: Auto-play effect (like a carousel)
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    let autoPlayInterval = setInterval(() => {
+      emblaApi.scrollNext();
+    }, 3000);
+
+    return () => clearInterval(autoPlayInterval);
+  }, [emblaApi]);
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -43,33 +54,40 @@ export default function SignInViewPage({
 
     try {
       // Step 1: Authenticate with Firebase
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const token = await userCredential.user.getIdToken();
-      
-       // Step 2: Fetch the profile data. This also verifies the user exists.
-      const profileData = await getProfileOnSignIn(token, 'AUDITOR'); 
-      
+
+      // Step 2: Fetch the profile data. This also verifies the user exists.
+      const profileData = await getProfileOnSignIn(token, 'AUDITOR');
+
       if (!profileData) {
         // If they don't exist, sign them out of Firebase and show an error.
         await signOut(auth);
-        toast.error("Account Not Found", { description: "No account found with this email. Please sign up first." });
-        throw new Error("No account found with this email. Please sign up first.");
+        toast.error('Account Not Found', {
+          description: 'No account found with this email. Please sign up first.'
+        });
+        throw new Error(
+          'No account found with this email. Please sign up first.'
+        );
       }
-      
+
       // Step 3: If they exist, proceed
       setProfile(profileData);
-      localStorage.setItem("userProfile", JSON.stringify(profileData));
+      localStorage.setItem('userProfile', JSON.stringify(profileData));
 
-      toast.success("Welcome back!");
+      toast.success('Welcome back!');
       router.push('/dashboard/overview'); // Redirect to dashboard
-
     } catch (err: any) {
       let userFriendlyMessage = err.message;
       if (err.code === 'auth/invalid-credential') {
-        userFriendlyMessage = "Invalid email or password. Please try again.";
+        userFriendlyMessage = 'Invalid email or password. Please try again.';
       }
       setError(userFriendlyMessage);
-      toast.error("Sign-in Failed", { description: userFriendlyMessage });
+      toast.error('Sign-in Failed', { description: userFriendlyMessage });
     } finally {
       setLoading(false);
     }
@@ -80,22 +98,24 @@ export default function SignInViewPage({
     setLoading(true);
     setError('');
     try {
-        const result = await signInWithPopup(auth, new GoogleAuthProvider());
-        const token = await result.user.getIdToken();
-        const profileData = await getProfileOnSignIn(token, 'AUDITOR');
-        if (!profileData) {
-            await signOut(auth);
-            throw new Error("No account is associated with this Google account. Please sign up first.");
-        }
-        setProfile(profileData);
-        localStorage.setItem("userProfile", JSON.stringify(profileData));
-        toast.success("Welcome back!");
-        router.push('/dashboard/overview');
+      const result = await signInWithPopup(auth, new GoogleAuthProvider());
+      const token = await result.user.getIdToken();
+      const profileData = await getProfileOnSignIn(token, 'AUDITOR');
+      if (!profileData) {
+        await signOut(auth);
+        throw new Error(
+          'No account is associated with this Google account. Please sign up first.'
+        );
+      }
+      setProfile(profileData);
+      localStorage.setItem('userProfile', JSON.stringify(profileData));
+      toast.success('Welcome back!');
+      router.push('/dashboard/overview');
     } catch (err: any) {
-        setError(err.message);
-        toast.error("Sign-in Failed", { description: err.message });
+      setError(err.message);
+      toast.error('Sign-in Failed', { description: err.message });
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -103,7 +123,12 @@ export default function SignInViewPage({
     <div className={`flex min-h-screen ${isDark ? 'bg-gray-950' : 'bg-white'}`}>
       {/* Left side - Testimonial */}
       <div
-        className={`hidden lg:flex lg:w-1/2 ${isDark ? 'bg-black' : 'bg-black'} flex-col justify-between p-12`}
+        className={`relative hidden flex-col justify-between bg-[url('/assets/AuthPage_Bg.png')] p-12 lg:flex lg:w-1/2`}
+        style={{
+          backgroundSize: 'calc(100% + 80px) auto', // Adjust 40px to match your offset, or even more
+          backgroundPosition: '-80px center', // Your desired offset
+          backgroundRepeat: 'no-repeat' // Ensure it doesn't repeat
+        }}
       >
         <div className='flex items-center space-x-3'>
           <Image
@@ -112,35 +137,57 @@ export default function SignInViewPage({
             width={180}
             height={40}
             priority
-            className='object-contain'
+            className='object-contain [filter:brightness(0)_invert(1)]'
           />
         </div>
 
-        {/* Testimonial */}
-        <div className='space-y-6'>
-          <blockquote className='text-lg leading-relaxed text-white'>
-            &ldquo;Sheetsway is a centralized platform designed to manage every
-            aspect of the audit process, enhancing both efficiency and accuracy.
-            It leverages AI, OCR, and custom risk-based auditing to streamline
-            financial audits and deliver smarter, faster results.&rdquo;
-          </blockquote>
+        {/* Embla Carousel */}
 
-          <div className='flex items-center space-x-4'>
-            <div className='flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500'>
-              <span className='text-sm font-semibold text-white'>ST</span>
-            </div>
-            <div>
-              <div className='font-semibold text-white'>Sarah Thompson</div>
-              <div className='text-sm text-gray-400'>
-                Project Manager
+        <div className='absolute inset-0 overflow-hidden'>
+          <div className='embla flex h-full items-center' ref={emblaRef}>
+            <div className='embla__container flex h-full'>
+              {' '}
+              {/* Added h-full here too */}
+              {/* Slides */}
+              <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
+                <img
+                  src='/assets/authPageImages/ticket copy.png'
+                  alt='Slide 1'
+                  className='max-h-[100%] max-w-[100%] object-contain'
+                />
+              </div>
+              <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
+                <img
+                  src='/assets/authPageImages/Calendar.png'
+                  alt='Slide 2'
+                  className='max-h-[100%] max-w-[100%] object-contain'
+                />
+              </div>
+              <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
+                <img
+                  src='/assets/authPageImages/Lamp.png'
+                  alt='Slide 3'
+                  className='max-h-[100%] max-w-[100%] object-contain' // Adjusted for scaling down
+                />
+              </div>
+              <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
+                <img
+                  src='/assets/authPageImages/Lightning.png'
+                  alt='Slide 4'
+                  className='max-h-[100%] max-w-[100%] object-contain' // Adjusted for scaling down
+                />
               </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className='text-sm text-gray-500'>
-          © 2024 Sheetsway. All rights reserved.
+        <div>
+          <img
+            src='/assets/authPageImages/text.png'
+            alt='footer'
+            className='mx-auto h-48 saturate-150'
+          />
         </div>
       </div>
 
@@ -304,7 +351,7 @@ export default function SignInViewPage({
                 variant='outline'
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className={`flex h-10 w-full items-center justify-center gap-3 rounded-md font-medium transition-colors hover:text-slate-400  ${
+                className={`flex h-10 w-full items-center justify-center gap-3 rounded-md font-medium transition-colors hover:text-slate-400 ${
                   isDark
                     ? 'border-gray-600 bg-gray-800 text-white hover:bg-gray-700'
                     : 'border-gray-300 bg-white text-gray-900 hover:bg-gray-50'
@@ -350,10 +397,3 @@ export default function SignInViewPage({
     </div>
   );
 }
-
-
-
-
-
-
-
