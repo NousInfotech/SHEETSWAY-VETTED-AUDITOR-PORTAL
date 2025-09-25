@@ -123,7 +123,7 @@ export default function SignInViewPage({
     <div className={`flex min-h-screen ${isDark ? 'bg-gray-950' : 'bg-white'}`}>
       {/* Left side - Testimonial */}
       <div
-        className={`relative hidden flex-col justify-between bg-[url('/assets/Bg.png')] p-12 lg:flex lg:w-1/2`}
+        className={`relative hidden flex-col justify-between bg-[url('/assets/Bg.png')] p-10 lg:flex lg:w-1/2`}
         style={{
           backgroundSize: 'cover', // or 'contain', or a specific value like '100% 100%' depending on your needs
           backgroundPosition: 'center center',
@@ -143,7 +143,7 @@ export default function SignInViewPage({
 
         {/* Embla Carousel */}
 
-        <div className='absolute inset-0 overflow-hidden z-10'>
+        <div className='absolute inset-0 z-10 overflow-hidden'>
           <div className='embla flex h-full items-center' ref={emblaRef}>
             <div className='embla__container flex h-full'>
               {' '}
@@ -152,28 +152,28 @@ export default function SignInViewPage({
                 <img
                   src='/assets/authPageImages/Auditor ticket.png'
                   alt='Slide 1'
-                  className='max-h-[100%] max-w-[100%] object-contain'
+                  className='max-h-[90%] max-w-[90%] object-contain'
                 />
               </div>
               <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
                 <img
                   src='/assets/authPageImages/Calendar.png'
                   alt='Slide 2'
-                  className='max-h-[100%] max-w-[100%] object-contain'
+                  className='max-h-[90%] max-w-[90%] object-contain'
                 />
               </div>
               <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
                 <img
                   src='/assets/authPageImages/Lamp.png'
                   alt='Slide 3'
-                  className='max-h-[100%] max-w-[100%] object-contain' // Adjusted for scaling down
+                  className='max-h-[90%] max-w-[90%] object-contain' // Adjusted for scaling down
                 />
               </div>
               <div className='embla__slide relative flex min-w-0 flex-[0_0_100%] items-center justify-center'>
                 <img
                   src='/assets/authPageImages/Lightning.png'
                   alt='Slide 4'
-                  className='max-h-[100%] max-w-[100%] object-contain' // Adjusted for scaling down
+                  className='max-h-[90%] max-w-[90%] object-contain' // Adjusted for scaling down
                 />
               </div>
             </div>
@@ -185,7 +185,7 @@ export default function SignInViewPage({
           <img
             src='/assets/authPageImages/text.png'
             alt='footer'
-            className='mx-auto h-36 saturate-150 bg-cover'
+            className='mx-auto h-28 bg-cover brightness-105 contrast-150 saturate-150'
           />
         </div>
       </div>
