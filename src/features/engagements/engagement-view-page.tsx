@@ -185,7 +185,7 @@ const EngagementViewPage = () => {
             onTabChange={setCurrentWorkspaceTab}
             onBack={handleBackToEngagements}
           >
-            {currentWorkspaceTab === 'accounting' && <></>}
+            {currentWorkspaceTab === 'accounting' && <ApideckHomePage />}
             {currentWorkspaceTab === 'banking' && <BankingDataView />}
             {currentWorkspaceTab === 'payments' && (
               <PaymentEscrowTab engagement={selectedEngagement} />
