@@ -9,7 +9,7 @@ import ConnectButton from '@/features/engagements/components/ConnectButton';
 
 import { useAuth } from '@/components/layout/providers';
 import { fetchConnections } from '@/api/salt-edge';
-import AccountCardsDisplay from './AccountCardsDisplay';
+
 import { AccountDataModal } from './AccountDataModal';
 import ConnectionCard from './ConnectionCard';
 import { getClientUser } from '@/api/clientUser';
@@ -22,18 +22,6 @@ const Loader = () => (
 
 export default function BankData({ engagement }: any) {
   const { user, loading: authLoading } = useAuth();
-
-  // 1. SHARED STATE: Get the connectionId and loading status from the global context.
-  // const { connectionId, isLoading } = useConnection();
-
-  // While the context is doing its initial check, show a loading message.
-  // if (isLoading) {
-  //   return (
-  //     <div className="container mx-auto p-4 text-center">
-  //       <p>Loading Connection Status...</p>
-  //     </div>
-  //   );
-  // }
 
   const [clientUser, setclientUser] = useState<any>(null);
   const [connections, setConnections] = useState<any>([]);
@@ -87,22 +75,17 @@ export default function BankData({ engagement }: any) {
     setSelectedConnection(null);
   };
 
+  if (loading) {
+    <Loader />;
+  }
+
   return (
     <div className='container mx-auto p-4'>
       <h1 className='mb-6 text-2xl font-bold'>Financial Dashboard</h1>
 
       <div className='mb-6 rounded-lg border p-6 text-center'>
-        {/* <ConnectButton /> */}
-        <h1 className='text-2xl font-semibold'>
-          Client's Accounts & Finance Management
-        </h1>
+        <ConnectButton />
       </div>
-
-      {
-        loading && (
-          <Loader />
-        )
-      }
 
       {connections.length > 0 && (
         <>
